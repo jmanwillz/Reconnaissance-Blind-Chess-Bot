@@ -6,3 +6,6 @@
 - [Existing Attempts](https://proceedings.mlr.press/v176/perrotta22a.html)
 - [reconchess: python package for Reconnaissance Chess](https://reconchess.readthedocs.io/en/latest/)
 - [Playing Games](https://reconchess.readthedocs.io/en/latest/bot_play.html)
+
+#### Part 1
+- [Forsyth–Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation)
