@@ -3,8 +3,6 @@
 
 import chess
 
-state = []
-
 fen = input()
 
 board = chess.Board(fen)
