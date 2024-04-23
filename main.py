@@ -53,6 +53,10 @@ def get_possible_moves_as_strings(moves: List[Move]) -> List[str]:
 
 def get_next_states_with_captures(board: Board, square: Square) -> List[Board]:
     result = []
+    moves = get_possible_moves(board)
+    for move in moves:
+        if move.to_square == square:
+            result.append(make_move(Board(board.fen()), move.uci()))
     return result
 
 
@@ -109,7 +113,7 @@ def part_2_submission_3():
     square = parse_square(capture_block)
     states = get_boards_as_strings(get_next_states_with_captures(board, square))
     for state in states:
-        print(states)
+        print(state)
 
 
 def main():
