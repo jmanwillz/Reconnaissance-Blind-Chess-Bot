@@ -1,24 +1,50 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
-import chess
+from chess import *
+from reconchess import *
 
 
-def get_board(fen_string):
-    return chess.Board(fen_string)
+def get_board(fen_string: str) -> Board:
+    return Board(fen_string)
 
 
-def make_move(board, input_move):
-    move = chess.Move.from_uci(input_move)
+def make_move(board: Board, input_move: str) -> Board:
+    move = Move.from_uci(input_move)
     board.push(move)
     return board
 
 
-def print_pretty_board(board):
+def print_pretty_board(board: Board):
     print(board)
 
 
-def print_fen_board(board):
+def print_fen_board(board: Board):
     print(board.fen())
+
+
+def get_castling_moves(board: Board) -> List[Move]:
+    castling_moves = []
+    for move in utilities.without_opponent_pieces(board).generate_castling_moves():
+        if not utilities.is_illegal_castle(board, move):
+            castling_moves.append(move)
+    return castling_moves
+
+
+def get_possible_moves(board: Board) -> List[str]:
+    null_move = Move.null()
+    pseudo_legal_moves = list(board.pseudo_legal_moves)
+    castling_moves = get_castling_moves(board)
+
+    possible_moves = set()
+    for move in pseudo_legal_moves:
+        possible_moves.add(move)
+
+    for move in castling_moves:
+        possible_moves.add(move)
+
+    possible_moves.add(null_move)
+
+    return sorted([move.uci() for move in list(possible_moves)])
 
 
 def part_1_submission_1():
@@ -35,9 +61,18 @@ def part_1_submission_2():
     print_fen_board(board_after_move)
 
 
+def part_2_submission_1():
+    fen_string = input()
+    board = get_board(fen_string)
+    moves = get_possible_moves(board)
+    for move in moves:
+        print(move)
+
+
 def main():
-    part_1_submission_1()
+    # part_1_submission_1()
     # part_1_submission_2()
+    part_2_submission_1()
 
 
 if __name__ == "__main__":
