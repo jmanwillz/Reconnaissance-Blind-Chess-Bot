@@ -1,12 +1,16 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
+from chess import *
+from reconchess import *
+
 from main import (
     get_board,
     make_move,
     get_possible_moves,
     get_possible_moves_as_strings,
     get_next_states,
-    get_next_states_as_strings,
+    get_boards_as_strings,
+    get_next_states_with_captures,
 )
 
 
@@ -147,8 +151,8 @@ def part_2_next_state_prediction():
     board_1 = get_board(input_1)
     board_2 = get_board(input_2)
 
-    states_1 = get_next_states_as_strings(get_next_states(board_1))
-    states_2 = get_next_states_as_strings(get_next_states(board_2))
+    states_1 = get_boards_as_strings(get_next_states(board_1))
+    states_2 = get_boards_as_strings(get_next_states(board_2))
 
     states_1_result = output_1_result.split("\n")
     states_2_result = output_2_result.split("\n")
@@ -168,6 +172,50 @@ def part_2_next_state_prediction():
     print(f"\t- Passed {round(count / 2 * 100, 2)}% of tests for Next State Prediction")
 
 
+def part_2_next_state_prediction_with_captures():
+    print("Testing Part 2 - Next State Prediction with Captures")
+
+    count = 0
+    fen_string_1 = "k1n1n3/p2p1p2/P2P1P2/8/8/8/8/7K b - - 23 30"
+    fen_string_2 = (
+        "r1bqk2r/pppp1ppp/2n2n2/4p3/1b2P3/1P3N2/PBPP1PPP/RN1QKB1R w KQkq - 0 5"
+    )
+    capture_block_1 = "d6"
+    capture_block_2 = "e5"
+
+    solution_1 = "k1n5/p2p1p2/P2n1P2/8/8/8/8/7K w - - 0 31\nk3n3/p2p1p2/P2n1P2/8/8/8/8/7K w - - 0 31"
+    solution_2 = "r1bqk2r/pppp1ppp/2n2n2/4B3/1b2P3/1P3N2/P1PP1PPP/RN1QKB1R b KQkq - 0 5\nr1bqk2r/pppp1ppp/2n2n2/4N3/1b2P3/1P6/PBPP1PPP/RN1QKB1R b KQkq - 0 5"
+
+    board_1 = get_board(fen_string_1)
+    board_2 = get_board(fen_string_2)
+
+    states_1 = get_boards_as_strings(
+        get_next_states_with_captures(board_1, parse_square(capture_block_1))
+    )
+    states_2 = get_boards_as_strings(
+        get_next_states_with_captures(board_2, parse_square(capture_block_2))
+    )
+
+    states_1_result = solution_1.split("\n")
+    states_2_result = solution_2.split("\n")
+
+    if states_1 == states_1_result:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 1")
+
+    if states_2 == states_2_result:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 2")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
+
+    print(
+        f"\t- Passed {round(count / 2 * 100, 2)}% of tests for Next State Prediction with Captures"
+    )
+
+
 def main():
     part_1_board_representation()
     print()
@@ -176,6 +224,8 @@ def main():
     part_2_next_move_prediction()
     print()
     part_2_next_state_prediction()
+    print()
+    part_2_next_state_prediction_with_captures()
 
 
 if __name__ == "__main__":

@@ -51,6 +51,15 @@ def get_possible_moves_as_strings(moves: List[Move]) -> List[str]:
     return sorted([move.uci() for move in list(moves)])
 
 
+def get_next_states_with_captures(board: Board, square: Square) -> List[Board]:
+    result = []
+    moves = get_possible_moves(board)
+    for move in moves:
+        if move.to_square == square:
+            result.append(make_move(Board(board.fen()), move.uci()))
+    return result
+
+
 def get_next_states(board: Board) -> List[Board]:
     result = []
     moves = get_possible_moves(board)
@@ -59,7 +68,7 @@ def get_next_states(board: Board) -> List[Board]:
     return result
 
 
-def get_next_states_as_strings(boards: List[Board]) -> List[str]:
+def get_boards_as_strings(boards: List[Board]) -> List[str]:
     result = []
     for board in boards:
         result.append(board.fen())
@@ -92,7 +101,17 @@ def part_2_submission_1():
 def part_2_submission_2():
     fen_string = input()
     board = get_board(fen_string)
-    states = get_next_states_as_strings(get_next_states(board))
+    states = get_boards_as_strings(get_next_states(board))
+    for state in states:
+        print(state)
+
+
+def part_2_submission_3():
+    fen_string = input()
+    capture_block = input()
+    board = get_board(fen_string)
+    square = parse_square(capture_block)
+    states = get_boards_as_strings(get_next_states_with_captures(board, square))
     for state in states:
         print(state)
 
@@ -101,7 +120,8 @@ def main():
     # part_1_submission_1()
     # part_1_submission_2()
     # part_2_submission_1()
-    part_2_submission_2()
+    # part_2_submission_2()
+    part_2_submission_3()
 
 
 if __name__ == "__main__":
