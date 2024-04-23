@@ -1,14 +1,10 @@
 # Reconnaissance Blind Chess Bot
 
----
-
 ## Members
 
-- Jason Wille
-- Kaylyn Karuppen
-- Reece Lazarus
-
----
+- Jason Wille (1352200)
+- Kaylyn Karuppen (2465081)
+- Reece Lazarus (2345362)
 
 ## Branching Strategy
 
@@ -16,8 +12,6 @@
 - development
   - feature/feature-name
   - bug/bug-name
-
----
 
 ## Installation
 
@@ -35,9 +29,7 @@ To run the code you can then execute the following command:
 python main.py
 ```
 
----
-
-## Play against the trout bot
+## Playing Chess
 
 Make sure to install Stockfish. On macOS this can be done as follows:
 
@@ -48,11 +40,23 @@ brew install stockfish
 It is then important to set the environment variable `STOCKFISH_EXECUTABLE`. You can do this by placing the following in your `.bashrc` or `.zshrc`.
 
 ```bash
-export STOCKFISH_EXECUTABLE="/opt/homebrew/bin/stockfish"
+export STOCKFISH_EXECUTABLE=$(which stockfish)
 ```
 
 You can then play against your bot by running:
 
 ```bash
 rc-play trout_bot.py
+```
+
+To face off a bot against the trout bot run the following:
+
+```bash
+rc-bot-match reconchess.bots.random_bot trout_bot.py
+```
+
+To replay a game from the game history file use the following command:
+
+```bash
+rc-replay <path to saved game history file>
 ```
