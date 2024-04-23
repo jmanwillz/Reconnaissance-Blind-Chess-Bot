@@ -30,7 +30,7 @@ def get_castling_moves(board: Board) -> List[Move]:
     return castling_moves
 
 
-def get_possible_moves(board: Board) -> List[str]:
+def get_possible_moves(board: Board) -> List[Move]:
     null_move = Move.null()
     pseudo_legal_moves = list(board.pseudo_legal_moves)
     castling_moves = get_castling_moves(board)
@@ -44,7 +44,26 @@ def get_possible_moves(board: Board) -> List[str]:
 
     possible_moves.add(null_move)
 
-    return sorted([move.uci() for move in list(possible_moves)])
+    return possible_moves
+
+
+def get_possible_moves_as_strings(moves: List[Move]) -> List[str]:
+    return sorted([move.uci() for move in list(moves)])
+
+
+def get_next_states(board: Board) -> List[Board]:
+    result = []
+    moves = get_possible_moves(board)
+    for move in moves:
+        result.append(make_move(Board(board.fen()), move.uci()))
+    return result
+
+
+def get_next_states_as_strings(boards: List[Board]) -> List[str]:
+    result = []
+    for board in boards:
+        result.append(board.fen())
+    return sorted(result)
 
 
 def part_1_submission_1():
@@ -65,14 +84,24 @@ def part_2_submission_1():
     fen_string = input()
     board = get_board(fen_string)
     moves = get_possible_moves(board)
-    for move in moves:
+    string_moves = get_possible_moves_as_strings(moves)
+    for move in string_moves:
         print(move)
+
+
+def part_2_submission_2():
+    fen_string = input()
+    board = get_board(fen_string)
+    states = get_next_states_as_strings(get_next_states(board))
+    for state in states:
+        print(state)
 
 
 def main():
     # part_1_submission_1()
     # part_1_submission_2()
-    part_2_submission_1()
+    # part_2_submission_1()
+    part_2_submission_2()
 
 
 if __name__ == "__main__":

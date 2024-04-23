@@ -1,6 +1,13 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
-from main import get_board, make_move, get_possible_moves
+from main import (
+    get_board,
+    make_move,
+    get_possible_moves,
+    get_possible_moves_as_strings,
+    get_next_states,
+    get_next_states_as_strings,
+)
 
 
 class bcolors:
@@ -85,8 +92,8 @@ def part_2_next_move_prediction():
     board_1 = get_board(input_1)
     board_2 = get_board(input_2)
 
-    moves_1 = get_possible_moves(board_1)
-    moves_2 = get_possible_moves(board_2)
+    moves_1 = get_possible_moves_as_strings(get_possible_moves(board_1))
+    moves_2 = get_possible_moves_as_strings(get_possible_moves(board_2))
 
     moves_1_solution = [
         "0000",
@@ -128,12 +135,47 @@ def part_2_next_move_prediction():
     print(f"\t- Passed {round(count / 2 * 100, 2)}% of tests for Next Move Prediction")
 
 
+def part_2_next_state_prediction():
+    print("Testing Part 2 - Next State Prediction")
+
+    count = 0
+    input_1 = "8/8/8/8/k7/8/7K/3B4 w - - 48 32"
+    input_2 = "k7/p2p1p2/P2P1P2/8/8/8/8/7K b - - 23 30"
+    output_1_result = "8/8/8/7B/k7/8/7K/8 b - - 49 32\n8/8/8/8/B7/8/7K/8 b - - 0 32\n8/8/8/8/k5B1/8/7K/8 b - - 49 32\n8/8/8/8/k7/1B6/7K/8 b - - 49 32\n8/8/8/8/k7/5B2/7K/8 b - - 49 32\n8/8/8/8/k7/6K1/8/3B4 b - - 49 32\n8/8/8/8/k7/7K/8/3B4 b - - 49 32\n8/8/8/8/k7/8/2B4K/8 b - - 49 32\n8/8/8/8/k7/8/4B2K/8 b - - 49 32\n8/8/8/8/k7/8/6K1/3B4 b - - 49 32\n8/8/8/8/k7/8/7K/3B4 b - - 49 32\n8/8/8/8/k7/8/8/3B2K1 b - - 49 32\n8/8/8/8/k7/8/8/3B3K b - - 49 32"
+    output_2_result = "1k6/p2p1p2/P2P1P2/8/8/8/8/7K w - - 24 31\n8/pk1p1p2/P2P1P2/8/8/8/8/7K w - - 24 31\nk7/p2p1p2/P2P1P2/8/8/8/8/7K w - - 24 31"
+
+    board_1 = get_board(input_1)
+    board_2 = get_board(input_2)
+
+    states_1 = get_next_states_as_strings(get_next_states(board_1))
+    states_2 = get_next_states_as_strings(get_next_states(board_2))
+
+    states_1_result = output_1_result.split("\n")
+    states_2_result = output_2_result.split("\n")
+
+    if states_1 == states_1_result:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 1")
+
+    if states_2 == states_2_result:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 2")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
+
+    print(f"\t- Passed {round(count / 2 * 100, 2)}% of tests for Next State Prediction")
+
+
 def main():
     part_1_board_representation()
     print()
     part_1_move_execution()
     print()
     part_2_next_move_prediction()
+    print()
+    part_2_next_state_prediction()
 
 
 if __name__ == "__main__":
