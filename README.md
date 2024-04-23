@@ -60,3 +60,27 @@ To replay a game from the game history file use the following command:
 ```bash
 rc-replay <path to saved game history file>
 ```
+
+## Marks
+
+- Part 1
+
+  1. Board representation: 100% (5%)
+  2. Move execution: 100% (5%)
+
+- Part 2
+
+  1. Next move prediction: 100% (5%)
+  2. Next state prediction: ?
+  3. Next state prediction with captures: ?
+  4. Next state prediction with sensing: ?
+
+- Part 3
+
+  1. Move generation: ?
+  2. Multiple move generation: ?
+
+- Part 4
+  1. Baseline implementation: ?
+  2. Report detailing improvements and round-robin tournament: ?
+  3. Competitive portion: ?
