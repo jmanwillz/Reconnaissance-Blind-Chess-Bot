@@ -1,4 +1,7 @@
 ### Useful Links
+
+#### RBC Overview
+
 - [Welcome to the RBC Research Community](https://rbc.jhuapl.edu/)
 - [Rules of Chess](https://en.wikipedia.org/wiki/Rules_of_chess)
 - [Rules of RBC](https://rbc.jhuapl.edu/gameRules)
@@ -7,5 +10,6 @@
 - [reconchess: python package for Reconnaissance Chess](https://reconchess.readthedocs.io/en/latest/)
 - [Playing Games](https://reconchess.readthedocs.io/en/latest/bot_play.html)
 
-#### Part 1
+#### Part 1 - State Representation
+
 - [Forsyth–Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation)
