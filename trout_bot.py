@@ -1,3 +1,5 @@
+# Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
+
 import chess.engine
 import random
 from reconchess import *
