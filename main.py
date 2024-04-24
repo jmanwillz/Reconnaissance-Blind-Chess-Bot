@@ -1,7 +1,10 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
 from chess import *
+from math import *
 from reconchess import *
+
+####################################################################################################################################################################################
 
 
 def get_board(fen_string: str) -> Board:
@@ -51,6 +54,26 @@ def get_possible_moves_as_strings(moves: List[Move]) -> List[str]:
     return sorted([move.uci() for move in list(moves)])
 
 
+def get_next_states_with_sensing(boards: List[Board], window: str) -> List[Board]:
+    result = []
+    for board in boards:
+        is_valid = True
+        for block in window.split(";"):
+            block = block.split(":")
+            square = parse_square(block[0])
+            if block[1] != "?":
+                piece = Piece.from_symbol(block[1])
+            else:
+                piece = None
+            actual_piece = board.piece_at(square)
+            if actual_piece != piece:
+                is_valid = False
+                break
+        if is_valid:
+            result.append(board)
+    return result
+
+
 def get_next_states_with_captures(board: Board, square: Square) -> List[Board]:
     result = []
     moves = get_possible_moves(board)
@@ -73,6 +96,9 @@ def get_boards_as_strings(boards: List[Board]) -> List[str]:
     for board in boards:
         result.append(board.fen())
     return sorted(result)
+
+
+####################################################################################################################################################################################
 
 
 def part_1_submission_1():
@@ -116,12 +142,25 @@ def part_2_submission_3():
         print(state)
 
 
+def part_2_submission_4():
+    number_of_boards = int(input())
+    boards = []
+    for _ in range(number_of_boards):
+        boards.append(get_board(input()))
+    for board in get_boards_as_strings(get_next_states_with_sensing(boards, input())):
+        print(board)
+
+
+####################################################################################################################################################################################
+
+
 def main():
     # part_1_submission_1()
     # part_1_submission_2()
     # part_2_submission_1()
     # part_2_submission_2()
-    part_2_submission_3()
+    # part_2_submission_3()
+    part_2_submission_4()
 
 
 if __name__ == "__main__":
