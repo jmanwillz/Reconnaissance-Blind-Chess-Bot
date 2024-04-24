@@ -143,7 +143,7 @@ def part_2_submission_3():
 
 
 def part_2_submission_4():
-    number_of_boards = input()
+    number_of_boards = int(input())
     boards = []
     for _ in range(number_of_boards):
         boards.append(get_board(input()))
