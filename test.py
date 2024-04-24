@@ -11,7 +11,6 @@ from main import (
     get_next_states,
     get_boards_as_strings,
     get_next_states_with_captures,
-    Window,
     get_next_states_with_sensing,
 )
 
@@ -227,24 +226,21 @@ def part_2_next_state_prediction_with_sensing():
     print("Testing Part 2 - Next State Prediction with Sensing")
 
     count = 0
-    fen_string_1 = "1k6/1ppn4/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32"
-    fen_string_2 = "1k6/1ppnP3/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32"
-    fen_string_3 = "1k6/1ppn1p2/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32"
+    fen_strings = [
+        "1k6/1ppn4/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32",
+        "1k6/1ppnP3/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32",
+        "1k6/1ppn1p2/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32",
+    ]
     window_string = "c8:?;d8:?;e8:?;c7:p;d7:n;e7:?;c6:?;d6:?;e6:?"
+    solution = "1k6/1ppn1p2/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32\n1k6/1ppn4/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32"
 
-    fen_strings = [fen_string_1, fen_string_2, fen_string_3]
     boards = []
-
     for fen_string in fen_strings:
         boards.append(get_board(fen_string))
 
-    window = Window(window_string)
+    states = get_boards_as_strings(get_next_states_with_sensing(boards, window_string))
 
-    boards = get_boards_as_strings(get_next_states_with_sensing(boards, window))
-
-    solution = "1k6/1ppn1p2/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32\n1k6/1ppn4/8/8/8/1P1P4/PN3P2/2K5 w - - 0 32"
-
-    if boards == solution.split("\n"):
+    if states == solution.split("\n"):
         print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
         count += 1
     else:
