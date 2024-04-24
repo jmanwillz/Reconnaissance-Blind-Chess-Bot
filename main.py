@@ -4,6 +4,8 @@ from chess import *
 from math import *
 from reconchess import *
 
+####################################################################################################################################################################################
+
 
 class Window:
     def __init__(self, window_string: str):
@@ -29,6 +31,9 @@ class Window:
 
     def __str__(self):
         return self.window_string
+
+
+####################################################################################################################################################################################
 
 
 def get_board(fen_string: str) -> Board:
@@ -110,6 +115,9 @@ def get_boards_as_strings(boards: List[Board]) -> List[str]:
     return sorted(result)
 
 
+####################################################################################################################################################################################
+
+
 def part_1_submission_1():
     fen_string = input()
     board = get_board(fen_string)
@@ -159,6 +167,9 @@ def part_2_submission_4():
     window = Window(input())
     for board in get_boards_as_strings(get_next_states_with_sensing(boards, window)):
         print(board)
+
+
+####################################################################################################################################################################################
 
 
 def main():
