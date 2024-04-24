@@ -73,7 +73,7 @@ rc-replay <path to saved game history file>
   1. Next move prediction: 100% (5%)
   2. Next state prediction: 100% (5%)
   3. Next state prediction with captures: 100% (5%)
-  4. Next state prediction with sensing: ?
+  4. Next state prediction with sensing: 100% (10%)
 
 - Part 3
 
@@ -81,6 +81,7 @@ rc-replay <path to saved game history file>
   2. Multiple move generation: ?
 
 - Part 4
+
   1. Baseline implementation: ?
   2. Report detailing improvements and round-robin tournament: ?
   3. Competitive portion: ?
