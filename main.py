@@ -4,6 +4,13 @@ from chess import *
 from math import *
 from reconchess import *
 
+import chess.engine
+import os
+
+####################################################################################################################################################################################
+
+STOCKFISH_ENV_VAR = "STOCKFISH_EXECUTABLE"
+
 ####################################################################################################################################################################################
 
 
@@ -98,6 +105,61 @@ def get_boards_as_strings(boards: List[Board]) -> List[str]:
     return sorted(result)
 
 
+def initialise_stockfish(local):
+    stockfish_path = "/opt/stockfish/stockfish"
+
+    if not local:
+        return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
+
+    if STOCKFISH_ENV_VAR in os.environ:
+        stockfish_path = os.environ[STOCKFISH_ENV_VAR]
+    else:
+        raise KeyError(f"The environment variable {STOCKFISH_ENV_VAR} does not exist.")
+
+    if not os.path.exists(stockfish_path):
+        raise ValueError(f"The path {stockfish_path} does not exist.")
+
+    return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
+
+
+def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
+    enemy_king_square = board.king(not board.turn)
+    if enemy_king_square:
+        enemy_king_attackers = board.attackers(board.turn, enemy_king_square)
+        if enemy_king_attackers:
+            attacker_square = enemy_king_attackers.pop()
+            return chess.Move(attacker_square, enemy_king_square)
+
+    try:
+        board.clear_stack()
+        result = stockfish_engine.play(board, chess.engine.Limit(time=0.1))
+        return result.move
+    except chess.engine.EngineTerminatedError:
+        print("Stockfish Engine died")
+    except chess.engine.EngineError:
+        print('Stockfish Engine bad state at "{}"'.format(board.fen()))
+
+    return None
+
+
+def multiple_move_generation(boards: List[Board], stockfish_engine) -> Optional[Move]:
+    move_dict = dict()
+    for board in boards:
+        new_move = generate_move(board, stockfish_engine).uci()
+        if new_move != None:
+            if new_move in move_dict:
+                move_dict[new_move] = move_dict[new_move] + 1
+            else:
+                move_dict[new_move] = 1
+
+    if len(move_dict.keys()) == 0:
+        return None
+
+    sorted_move_dict = dict(sorted(move_dict.items()))
+    max_move = max(sorted_move_dict, key=sorted_move_dict.get)
+    return Move.from_uci(max_move)
+
+
 ####################################################################################################################################################################################
 
 
@@ -151,6 +213,26 @@ def part_2_submission_4():
         print(board)
 
 
+def part_3_submission_1(local):
+    fen_string = input()
+    board = get_board(fen_string)
+    stockfish_engine = initialise_stockfish(local)
+    move = generate_move(board, stockfish_engine)
+    print(move)
+    stockfish_engine.quit()
+
+
+def part_3_submission_2(local):
+    number_of_boards = int(input())
+    boards = []
+    for _ in range(number_of_boards):
+        boards.append(get_board(input()))
+    stockfish_engine = initialise_stockfish(local)
+    move = multiple_move_generation(boards, stockfish_engine)
+    print(move)
+    stockfish_engine.quit()
+
+
 ####################################################################################################################################################################################
 
 
@@ -160,7 +242,9 @@ def main():
     # part_2_submission_1()
     # part_2_submission_2()
     # part_2_submission_3()
-    part_2_submission_4()
+    # part_2_submission_4()
+    # part_3_submission_1(local=False)
+    part_3_submission_2(local=False)
 
 
 if __name__ == "__main__":

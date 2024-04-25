@@ -77,8 +77,8 @@ rc-replay <path to saved game history file>
 
 - Part 3
 
-  1. Move generation: ?
-  2. Multiple move generation: ?
+  1. Move generation: 100% (5%)
+  2. Multiple move generation: 100% (5%)
 
 - Part 4
 

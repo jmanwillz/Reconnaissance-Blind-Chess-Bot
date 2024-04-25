@@ -12,7 +12,11 @@ from main import (
     get_boards_as_strings,
     get_next_states_with_captures,
     get_next_states_with_sensing,
+    generate_move,
+    initialise_stockfish,
 )
+
+import subprocess
 
 ####################################################################################################################################################################################
 
@@ -251,6 +255,79 @@ def part_2_next_state_prediction_with_sensing():
     )
 
 
+def part_3_move_generation():
+    print("Testing Part 3 - Move Generation")
+
+    count = 0
+    sample_input_1 = "8/8/8/8/k7/8/7K/3B4 w - - 48 32"
+    sample_input_2 = "k7/p2p1p2/P2P1P2/8/8/8/8/7K b - - 23 30"
+    sample_input_3 = "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R w KQ - 7 11"
+    sample_output_1 = "d1a4"
+    sample_output_2 = "a8b8"
+    sample_output_3 = "h5h7"
+
+    stockfish_engine = initialise_stockfish(True)
+
+    result_output_1 = generate_move(get_board(sample_input_1), stockfish_engine).uci()
+    if result_output_1 == sample_output_1:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 1")
+
+    result_output_2 = generate_move(get_board(sample_input_2), stockfish_engine).uci()
+    if result_output_2 == sample_output_2:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 2")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
+
+    result_output_3 = generate_move(get_board(sample_input_3), stockfish_engine).uci()
+    if result_output_3 == sample_output_3:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 3")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 3")
+
+    stockfish_engine.quit()
+
+    print(f"\t- Passed {round(count / 3 * 100, 2)}% of tests for Move Generation")
+
+
+def part_3_multiple_move_generation():
+    print("Testing Part 3 - Multiple Move Generation")
+
+    count = 0
+    sample_input_1 = "2\nr1bqk2r/pppp1ppp/2n2n2/4B3/1b2P3/1P3N2/P1PP1PPP/RN1QKB1R b KQkq - 0 5\nr1bqk2r/pppp1ppp/2n2n2/4N3/1b2P3/1P6/PBPP1PPP/RN1QKB1R b KQkq - 0 5"
+    sample_input_2 = "4\n8/3k2pn/7P/8/8/8/4K3/8 w - - 0 45\n8/3k2pp/7P/8/8/8/4K3/8 w - - 0 45\n8/4k1p1/7P/8/8/8/4K3/8 w - - 0 45\n8/4k1p1/7P/7b/8/8/4K3/8 w - - 0 45"
+
+    command_1 = f'python main.py <<< "{sample_input_1}"'
+    command_2 = f'python main.py <<< "{sample_input_2}"'
+
+    result_1 = subprocess.run(
+        command_1, shell=True, capture_output=True, text=True
+    ).stdout.strip()
+    result_2 = subprocess.run(
+        command_2, shell=True, capture_output=True, text=True
+    ).stdout.strip()
+
+    if result_1 == "c6e5":
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 1")
+
+    if result_2 == "h6g7":
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 2")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
+
+    print(
+        f"\t- Passed {round(count / 2 * 100, 2)}% of tests for Multiple Move Generation"
+    )
+
+
 ####################################################################################################################################################################################
 
 
@@ -266,6 +343,10 @@ def main():
     part_2_next_state_prediction_with_captures()
     print()
     part_2_next_state_prediction_with_sensing()
+    print()
+    part_3_move_generation()
+    print()
+    part_3_multiple_move_generation()
 
 
 if __name__ == "__main__":
