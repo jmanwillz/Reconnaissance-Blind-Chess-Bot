@@ -142,6 +142,24 @@ def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
     return None
 
 
+def multiple_move_generation(boards: List[Board], stockfish_engine) -> Optional[Move]:
+    move_dict = dict()
+    for board in boards:
+        new_move = generate_move(board, stockfish_engine).uci()
+        if new_move != None:
+            if new_move in move_dict:
+                move_dict[new_move] = move_dict[new_move] + 1
+            else:
+                move_dict[new_move] = 1
+
+    if len(move_dict.keys()) == 0:
+        return None
+
+    sorted_move_dict = dict(sorted(move_dict.items()))
+    max_move = max(sorted_move_dict, key=sorted_move_dict.get)
+    return Move.from_uci(max_move)
+
+
 ####################################################################################################################################################################################
 
 
@@ -204,6 +222,17 @@ def part_3_submission_1(local):
     stockfish_engine.quit()
 
 
+def part_3_submission_2(local):
+    number_of_boards = int(input())
+    boards = []
+    for _ in range(number_of_boards):
+        boards.append(get_board(input()))
+    stockfish_engine = initialise_stockfish(local)
+    move = multiple_move_generation(boards, stockfish_engine)
+    print(move)
+    stockfish_engine.quit()
+
+
 ####################################################################################################################################################################################
 
 
@@ -214,7 +243,8 @@ def main():
     # part_2_submission_2()
     # part_2_submission_3()
     # part_2_submission_4()
-    part_3_submission_1(local=False)
+    # part_3_submission_1(local=False)
+    part_3_submission_2(local=False)
 
 
 if __name__ == "__main__":

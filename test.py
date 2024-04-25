@@ -16,6 +16,8 @@ from main import (
     initialise_stockfish,
 )
 
+import subprocess
+
 ####################################################################################################################################################################################
 
 
@@ -292,6 +294,40 @@ def part_3_move_generation():
     print(f"\t- Passed {round(count / 3 * 100, 2)}% of tests for Move Generation")
 
 
+def part_3_multiple_move_generation():
+    print("Testing Part 3 - Multiple Move Generation")
+
+    count = 0
+    sample_input_1 = "2\nr1bqk2r/pppp1ppp/2n2n2/4B3/1b2P3/1P3N2/P1PP1PPP/RN1QKB1R b KQkq - 0 5\nr1bqk2r/pppp1ppp/2n2n2/4N3/1b2P3/1P6/PBPP1PPP/RN1QKB1R b KQkq - 0 5"
+    sample_input_2 = "4\n8/3k2pn/7P/8/8/8/4K3/8 w - - 0 45\n8/3k2pp/7P/8/8/8/4K3/8 w - - 0 45\n8/4k1p1/7P/8/8/8/4K3/8 w - - 0 45\n8/4k1p1/7P/7b/8/8/4K3/8 w - - 0 45"
+
+    command_1 = f'python main.py <<< "{sample_input_1}"'
+    command_2 = f'python main.py <<< "{sample_input_2}"'
+
+    result_1 = subprocess.run(
+        command_1, shell=True, capture_output=True, text=True
+    ).stdout.strip()
+    result_2 = subprocess.run(
+        command_2, shell=True, capture_output=True, text=True
+    ).stdout.strip()
+
+    if result_1 == "c6e5":
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 1")
+
+    if result_2 == "h6g7":
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 2")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
+
+    print(
+        f"\t- Passed {round(count / 2 * 100, 2)}% of tests for Multiple Move Generation"
+    )
+
+
 ####################################################################################################################################################################################
 
 
@@ -309,6 +345,8 @@ def main():
     part_2_next_state_prediction_with_sensing()
     print()
     part_3_move_generation()
+    print()
+    part_3_multiple_move_generation()
 
 
 if __name__ == "__main__":
