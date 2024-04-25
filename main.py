@@ -132,7 +132,7 @@ def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
 
     try:
         board.clear_stack()
-        result = stockfish_engine.play(board, chess.engine.Limit(time=0.5))
+        result = stockfish_engine.play(board, chess.engine.Limit(time=0.1))
         return result.move
     except chess.engine.EngineTerminatedError:
         print("Stockfish Engine died")
