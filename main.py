@@ -112,7 +112,7 @@ def initialise_stockfish():
 
     if os.path.exists(stockfish_path_1):
         stockfish_path = stockfish_path_1
-    elif os.path.exists(stockfish_path_1):
+    elif os.path.exists(stockfish_path_2):
         stockfish_path = stockfish_path_2
 
     if STOCKFISH_ENV_VAR in os.environ:
