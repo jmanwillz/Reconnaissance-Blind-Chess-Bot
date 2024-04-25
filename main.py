@@ -106,11 +106,21 @@ def get_boards_as_strings(boards: List[Board]) -> List[str]:
 
 
 def initialise_stockfish():
-    if STOCKFISH_ENV_VAR not in os.environ:
-        stockfish_path = "/opt/stockfish/stockfish"
-    stockfish_path = os.environ[STOCKFISH_ENV_VAR]
-    if not os.path.exists(stockfish_path):
-        raise ValueError(f"No stockfish executable found at {stockfish_path}")
+    stockfish_path = ""
+    stockfish_path_1 = "./stockfish"
+    stockfish_path_2 = "/opt/stockfish/stockfish"
+
+    if os.path.exists(stockfish_path_1):
+        stockfish_path = stockfish_path_1
+    elif os.path.exists(stockfish_path_1):
+        stockfish_path = stockfish_path_2
+
+    if STOCKFISH_ENV_VAR in os.environ:
+        stockfish_path = os.environ[STOCKFISH_ENV_VAR]
+
+    if stockfish_path == "":
+        raise ValueError(f"No stockfish executable found.")
+
     return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
 
