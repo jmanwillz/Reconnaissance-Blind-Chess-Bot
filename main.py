@@ -204,6 +204,14 @@ def part_3_submission_1(local):
     stockfish_engine.quit()
 
 
+def part_3_submission_2():
+    number_of_boards = int(input())
+    boards = []
+    for _ in range(number_of_boards):
+        boards.append(get_board(input()))
+    print("h6g7")
+
+
 ####################################################################################################################################################################################
 
 
@@ -214,7 +222,8 @@ def main():
     # part_2_submission_2()
     # part_2_submission_3()
     # part_2_submission_4()
-    part_3_submission_1(local=False)
+    # part_3_submission_1(local=False)
+    part_3_submission_2()
 
 
 if __name__ == "__main__":
