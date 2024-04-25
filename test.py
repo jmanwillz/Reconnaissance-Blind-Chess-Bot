@@ -264,7 +264,7 @@ def part_3_move_generation():
     sample_output_2 = "a8b8"
     sample_output_3 = "h5h7"
 
-    stockfish_engine = initialise_stockfish()
+    stockfish_engine = initialise_stockfish(True)
     result_output_1 = generate_move(get_board(sample_input_1), stockfish_engine).uci()
     result_output_2 = generate_move(get_board(sample_input_2), stockfish_engine).uci()
     result_output_3 = generate_move(get_board(sample_input_3), stockfish_engine).uci()

@@ -105,21 +105,19 @@ def get_boards_as_strings(boards: List[Board]) -> List[str]:
     return sorted(result)
 
 
-def initialise_stockfish():
-    stockfish_path = ""
-    stockfish_path_1 = "./stockfish"
-    stockfish_path_2 = "/opt/stockfish/stockfish"
+def initialise_stockfish(local):
+    stockfish_path = "/opt/stockfish/stockfish"
 
-    if os.path.exists(stockfish_path_1):
-        stockfish_path = stockfish_path_1
-    elif os.path.exists(stockfish_path_2):
-        stockfish_path = stockfish_path_2
+    if not local:
+        return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
     if STOCKFISH_ENV_VAR in os.environ:
         stockfish_path = os.environ[STOCKFISH_ENV_VAR]
+    else:
+        raise KeyError(f"The environment variable {STOCKFISH_ENV_VAR} does not exist.")
 
-    if stockfish_path == "":
-        raise ValueError(f"No stockfish executable found.")
+    if not os.path.exists(stockfish_path):
+        raise ValueError(f"The path {stockfish_path} does not exist.")
 
     return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
@@ -200,7 +198,7 @@ def part_2_submission_4():
 def part_3_submission_1():
     fen_string = input()
     board = get_board(fen_string)
-    stockfish_engine = initialise_stockfish()
+    stockfish_engine = initialise_stockfish(False)
     move = generate_move(board, stockfish_engine)
     print(move)
     stockfish_engine.quit()
