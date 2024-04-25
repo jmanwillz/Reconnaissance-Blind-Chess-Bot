@@ -12,6 +12,7 @@ from main import (
     get_boards_as_strings,
     get_next_states_with_captures,
     get_next_states_with_sensing,
+    generate_move,
 )
 
 ####################################################################################################################################################################################
@@ -251,6 +252,42 @@ def part_2_next_state_prediction_with_sensing():
     )
 
 
+def part_3_move_generation():
+    print("Testing Part 3 - Move Generation")
+
+    count = 0
+    sample_input_1 = "8/8/8/8/k7/8/7K/3B4 w - - 48 32"
+    sample_input_2 = "k7/p2p1p2/P2P1P2/8/8/8/8/7K b - - 23 30"
+    sample_input_3 = "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R w KQ - 7 11"
+    sample_output_1 = "d1a4"
+    sample_output_2 = "a8b8"
+    sample_output_3 = "h5h7"
+
+    result_output_1 = generate_move(get_board(sample_input_1)).uci()
+    result_output_2 = generate_move(get_board(sample_input_2)).uci()
+    result_output_3 = generate_move(get_board(sample_input_3)).uci()
+
+    if result_output_1 == sample_output_1:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 1")
+
+    if result_output_2 == sample_output_2:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 2")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
+
+    if result_output_3 == sample_output_3:
+        print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 3")
+        count += 1
+    else:
+        print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 3")
+
+    print(f"\t- Passed {round(count / 3 * 100, 2)}% of tests for Move Generation")
+
+
 ####################################################################################################################################################################################
 
 
@@ -266,6 +303,8 @@ def main():
     part_2_next_state_prediction_with_captures()
     print()
     part_2_next_state_prediction_with_sensing()
+    print()
+    part_3_move_generation()
 
 
 if __name__ == "__main__":
