@@ -265,28 +265,29 @@ def part_3_move_generation():
     sample_output_3 = "h5h7"
 
     stockfish_engine = initialise_stockfish(True)
-    result_output_1 = generate_move(get_board(sample_input_1), stockfish_engine).uci()
-    result_output_2 = generate_move(get_board(sample_input_2), stockfish_engine).uci()
-    result_output_3 = generate_move(get_board(sample_input_3), stockfish_engine).uci()
-    stockfish_engine.quit()
 
+    result_output_1 = generate_move(get_board(sample_input_1), stockfish_engine).uci()
     if result_output_1 == sample_output_1:
         print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
         count += 1
     else:
         print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 1")
 
+    result_output_2 = generate_move(get_board(sample_input_2), stockfish_engine).uci()
     if result_output_2 == sample_output_2:
         print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 2")
         count += 1
     else:
         print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
 
+    result_output_3 = generate_move(get_board(sample_input_3), stockfish_engine).uci()
     if result_output_3 == sample_output_3:
         print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 3")
         count += 1
     else:
         print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 3")
+
+    stockfish_engine.quit()
 
     print(f"\t- Passed {round(count / 3 * 100, 2)}% of tests for Move Generation")
 
