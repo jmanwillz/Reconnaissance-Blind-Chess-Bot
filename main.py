@@ -195,10 +195,10 @@ def part_2_submission_4():
         print(board)
 
 
-def part_3_submission_1():
+def part_3_submission_1(local):
     fen_string = input()
     board = get_board(fen_string)
-    stockfish_engine = initialise_stockfish(False)
+    stockfish_engine = initialise_stockfish(local)
     move = generate_move(board, stockfish_engine)
     print(move)
     stockfish_engine.quit()
@@ -214,7 +214,7 @@ def main():
     # part_2_submission_2()
     # part_2_submission_3()
     # part_2_submission_4()
-    part_3_submission_1()
+    part_3_submission_1(local=False)
 
 
 if __name__ == "__main__":
