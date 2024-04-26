@@ -81,7 +81,7 @@ def get_next_states_with_sensing(boards: List[Board], window: str) -> List[Board
     return result
 
 
-def get_next_states_with_captures(board: Board, square: Square) -> List[Board]:
+def get_next_states_with_capture(board: Board, square: Square) -> List[Board]:
     result = []
     moves = get_possible_moves(board)
     for move in moves:
@@ -122,7 +122,7 @@ def initialise_stockfish(local):
     return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
 
-def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
+def generate_move(board: Board, stockfish_engine, stockfish_time=0.1) -> Optional[Move]:
     enemy_king_square = board.king(not board.turn)
     if enemy_king_square:
         enemy_king_attackers = board.attackers(board.turn, enemy_king_square)
@@ -132,7 +132,7 @@ def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
 
     try:
         board.clear_stack()
-        result = stockfish_engine.play(board, chess.engine.Limit(time=0.1))
+        result = stockfish_engine.play(board, chess.engine.Limit(time=stockfish_time))
         return result.move
     except chess.engine.EngineTerminatedError:
         print("Stockfish Engine died")
@@ -142,10 +142,12 @@ def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
     return None
 
 
-def multiple_move_generation(boards: List[Board], stockfish_engine) -> Optional[Move]:
+def multiple_move_generation(
+    boards: List[Board], stockfish_engine, stockfish_time=0.1
+) -> Optional[Move]:
     move_dict = dict()
     for board in boards:
-        new_move = generate_move(board, stockfish_engine).uci()
+        new_move = generate_move(board, stockfish_engine, stockfish_time).uci()
         if new_move != None:
             if new_move in move_dict:
                 move_dict[new_move] = move_dict[new_move] + 1
@@ -199,7 +201,7 @@ def part_2_submission_3():
     capture_block = input()
     board = get_board(fen_string)
     square = parse_square(capture_block)
-    states = get_boards_as_strings(get_next_states_with_captures(board, square))
+    states = get_boards_as_strings(get_next_states_with_capture(board, square))
     for state in states:
         print(state)
 
