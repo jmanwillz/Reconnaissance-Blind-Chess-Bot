@@ -1,15 +1,79 @@
-import random
+# Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
+
+from chess import *
+from main import (
+    get_next_states_with_capture,
+    get_next_states_with_sensing,
+    multiple_move_generation,
+)
 from reconchess import *
+from typing import Set
+
+import os
+import random
+
+####################################################################################################################################################################################
+
+STOCKFISH_ENV_VAR = "STOCKFISH_EXECUTABLE"
+
+####################################################################################################################################################################################
 
 
-class RandomBot(Player):
-    def handle_game_start(self, color: Color, board: chess.Board, opponent_name: str):
-        pass
+def initialise_stockfish():
+    stockfish_path = ""
+    if STOCKFISH_ENV_VAR in os.environ:
+        candidate_path = os.environ[STOCKFISH_ENV_VAR]
+        if os.path.exists(candidate_path):
+            stockfish_path = candidate_path
+    if stockfish_path == "":
+        stockfish_path = "/opt/stockfish/stockfish"
+    return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
+
+
+def is_on_edge(square: Square) -> bool:
+    file, rank = square_file(square), square_rank(square)
+    return file in {0, 7} or rank in {0, 7}
+
+
+def get_window_string(sense_result: List[Tuple[Square, Optional[chess.Piece]]]) -> str:
+    window_str = ""
+    for part in sense_result:
+        window_str += square_name(part[0]) + ":"
+        if part[1] is None:
+            window_str += "?"
+        else:
+            window_str += part[1].symbol()
+        window_str += ";"
+    return window_str[:-1]
+
+
+####################################################################################################################################################################################
+
+
+class BaselineAgent(Player):
+    def __init__(self):
+        self.my_color: Color = None
+        self.opponent_name: str = None
+        self.my_piece_captured_square: Optional[Square] = None
+        self.current_state: Board = None
+        self.possible_states: Set[Board] = set()
+        self.engine = initialise_stockfish()
+
+    def handle_game_start(self, color: Color, board: Board, opponent_name: str):
+        self.my_color = color
+        self.opponent_name = opponent_name
+        self.current_state = board
 
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
-        pass
+        self.my_piece_captured_square = capture_square
+        if captured_my_piece:
+            self.current_state.remove_piece_at(capture_square)
+            for state in get_next_states_with_capture(
+                self.current_state, capture_square
+            ):
+                self.possible_states.add(state)
 
     def choose_sense(
         self,
@@ -17,17 +81,40 @@ class RandomBot(Player):
         move_actions: List[chess.Move],
         seconds_left: float,
     ) -> Optional[Square]:
-        return random.choice(sense_actions)
+        while True:
+            if len(sense_actions) == 0:
+                return None
+            sense_choice: Square = random.choice(sense_actions)
+            sense_actions.remove(sense_choice)
+            if not is_on_edge(sense_choice):
+                return sense_choice
 
     def handle_sense_result(
         self, sense_result: List[Tuple[Square, Optional[chess.Piece]]]
     ):
-        pass
+        for square, piece in sense_result:
+            self.current_state.set_piece_at(square, piece)
+
+        window_string = get_window_string(sense_result)
+
+        for state in get_next_states_with_sensing(
+            list(self.possible_states), window_string
+        ):
+            self.possible_states.add(state)
 
     def choose_move(
         self, move_actions: List[chess.Move], seconds_left: float
     ) -> Optional[chess.Move]:
-        return random.choice(move_actions + [None])
+        while len(self.possible_states) > 10000:
+            self.possible_states.remove(random.choice(self.possible_states))
+
+        stockfish_time = 10 / len(self.possible_states)
+
+        return multiple_move_generation(
+            self.possible_states,
+            self.engine,
+            stockfish_time,
+        )
 
     def handle_move_result(
         self,
@@ -36,7 +123,8 @@ class RandomBot(Player):
         captured_opponent_piece: bool,
         capture_square: Optional[Square],
     ):
-        pass
+        if taken_move is not None:
+            self.board.push(taken_move)
 
     def handle_game_end(
         self,
@@ -44,4 +132,7 @@ class RandomBot(Player):
         win_reason: Optional[WinReason],
         game_history: GameHistory,
     ):
-        pass
+        try:
+            self.engine.quit()
+        except chess.engine.EngineTerminatedError:
+            pass
