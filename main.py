@@ -105,6 +105,30 @@ def get_boards_as_strings(boards: List[Board]) -> List[str]:
     return sorted(result)
 
 
+def get_strings_as_boards(board_strings: List[str]) -> List[Board]:
+    result = []
+    for board_string in board_strings:
+        result.append(get_board(board_string))
+    return result
+
+
+def is_on_edge(square: Square) -> bool:
+    file, rank = square_file(square), square_rank(square)
+    return file in {0, 7} or rank in {0, 7}
+
+
+def get_window_string(sense_result: List[Tuple[Square, Optional[chess.Piece]]]) -> str:
+    window_str = ""
+    for part in sense_result:
+        window_str += square_name(part[0]) + ":"
+        if part[1] is None:
+            window_str += "?"
+        else:
+            window_str += part[1].symbol()
+        window_str += ";"
+    return window_str[:-1]
+
+
 def initialise_stockfish(local):
     stockfish_path = "/opt/stockfish/stockfish"
 

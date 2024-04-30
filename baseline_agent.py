@@ -5,6 +5,9 @@ from main import (
     get_next_states_with_capture,
     get_next_states_with_sensing,
     multiple_move_generation,
+    get_strings_as_boards,
+    is_on_edge,
+    get_window_string,
 )
 from reconchess import *
 from typing import Set
@@ -30,23 +33,6 @@ def initialise_stockfish():
     return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
 
-def is_on_edge(square: Square) -> bool:
-    file, rank = square_file(square), square_rank(square)
-    return file in {0, 7} or rank in {0, 7}
-
-
-def get_window_string(sense_result: List[Tuple[Square, Optional[chess.Piece]]]) -> str:
-    window_str = ""
-    for part in sense_result:
-        window_str += square_name(part[0]) + ":"
-        if part[1] is None:
-            window_str += "?"
-        else:
-            window_str += part[1].symbol()
-        window_str += ";"
-    return window_str[:-1]
-
-
 ####################################################################################################################################################################################
 
 
@@ -56,13 +42,14 @@ class BaselineAgent(Player):
         self.opponent_name: str = None
         self.my_piece_captured_square: Optional[Square] = None
         self.current_state: Board = None
-        self.possible_states: Set[Board] = set()
+        self.possible_states: Set[str] = set()
         self.engine = initialise_stockfish()
 
     def handle_game_start(self, color: Color, board: Board, opponent_name: str):
         self.my_color = color
         self.opponent_name = opponent_name
         self.current_state = board
+        self.possible_states.add(self.current_state.fen())
 
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
@@ -73,7 +60,7 @@ class BaselineAgent(Player):
             for state in get_next_states_with_capture(
                 self.current_state, capture_square
             ):
-                self.possible_states.add(state)
+                self.possible_states.add(state.fen())
 
     def choose_sense(
         self,
@@ -98,9 +85,9 @@ class BaselineAgent(Player):
         window_string = get_window_string(sense_result)
 
         for state in get_next_states_with_sensing(
-            list(self.possible_states), window_string
+            get_strings_as_boards(list(self.possible_states)), window_string
         ):
-            self.possible_states.add(state)
+            self.possible_states.add(state.fen())
 
     def choose_move(
         self, move_actions: List[chess.Move], seconds_left: float
@@ -111,7 +98,7 @@ class BaselineAgent(Player):
         stockfish_time = 10 / len(self.possible_states)
 
         return multiple_move_generation(
-            self.possible_states,
+            get_strings_as_boards(list(self.possible_states)),
             self.engine,
             stockfish_time,
         )
@@ -124,7 +111,7 @@ class BaselineAgent(Player):
         capture_square: Optional[Square],
     ):
         if taken_move is not None:
-            self.board.push(taken_move)
+            self.current_state.push(taken_move)
 
     def handle_game_end(
         self,
