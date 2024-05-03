@@ -1,4 +1,7 @@
-time_trial
 __pycache__
+.idea
+.run
 .vscode
+time_trial
+
 *.json
