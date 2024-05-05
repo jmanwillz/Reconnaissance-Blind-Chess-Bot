@@ -162,23 +162,26 @@ def initialise_stockfish(local):
 
 
 def generate_move(board: Board, stockfish_engine, stockfish_time=0.1) -> Optional[Move]:
+    friendly_king_square = board.king(board.turn)
     enemy_king_square = board.king(not board.turn)
+
+    if enemy_king_square == None or friendly_king_square == None:
+        return None
+
     if enemy_king_square:
         enemy_king_attackers = board.attackers(board.turn, enemy_king_square)
         if enemy_king_attackers:
             attacker_square = enemy_king_attackers.pop()
             return chess.Move(attacker_square, enemy_king_square)
-        else:
-            try:
-                board.clear_stack()
-                result = stockfish_engine.play(
-                    board, chess.engine.Limit(time=stockfish_time)
-                )
-                return result.move
-            except chess.engine.EngineTerminatedError:
-                print("Stockfish Engine died", end=", ")
-            except chess.engine.EngineError:
-                print('Stockfish Engine bad state at "{}"'.format(board.fen()))
+
+    try:
+        board.clear_stack()
+        result = stockfish_engine.play(board, chess.engine.Limit(time=stockfish_time))
+        return result.move
+    except chess.engine.EngineTerminatedError:
+        print("Stockfish Engine died", end=", ")
+    except chess.engine.EngineError:
+        print('Stockfish Engine bad state at "{}"'.format(board.fen()))
 
     return None
 
