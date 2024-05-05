@@ -168,15 +168,17 @@ def generate_move(board: Board, stockfish_engine, stockfish_time=0.1) -> Optiona
         if enemy_king_attackers:
             attacker_square = enemy_king_attackers.pop()
             return chess.Move(attacker_square, enemy_king_square)
-
-    try:
-        board.clear_stack()
-        result = stockfish_engine.play(board, chess.engine.Limit(time=stockfish_time))
-        return result.move
-    except chess.engine.EngineTerminatedError:
-        print("Stockfish Engine died", end=", ")
-    except chess.engine.EngineError:
-        print('Stockfish Engine bad state at "{}"'.format(board.fen()))
+        else:
+            try:
+                board.clear_stack()
+                result = stockfish_engine.play(
+                    board, chess.engine.Limit(time=stockfish_time)
+                )
+                return result.move
+            except chess.engine.EngineTerminatedError:
+                print("Stockfish Engine died", end=", ")
+            except chess.engine.EngineError:
+                print('Stockfish Engine bad state at "{}"'.format(board.fen()))
 
     return None
 
