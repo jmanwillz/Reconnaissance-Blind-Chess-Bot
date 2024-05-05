@@ -1,6 +1,8 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
 from chess import *
+from datetime import datetime
+from fentoboardimage import *
 from math import *
 from reconchess import *
 
@@ -12,6 +14,19 @@ import os
 STOCKFISH_ENV_VAR = "STOCKFISH_EXECUTABLE"
 
 ########################################################################################################################
+
+
+def visualize_boards(boards: List[Board]):
+    os.makedirs("states", exist_ok=True)
+    for board in boards:
+        boardImage = fenToImage(
+            fen=board.fen(),
+            squarelength=100,
+            pieceSet=loadPiecesFolder("./pieces"),
+            darkColor="#D18B47",
+            lightColor="#FFCE9E",
+        )
+        boardImage.save(os.path.join("states", f"{datetime.now()}.png"))
 
 
 def get_board(fen_string: str) -> Board:
@@ -159,7 +174,7 @@ def generate_move(board: Board, stockfish_engine, stockfish_time=0.1) -> Optiona
         result = stockfish_engine.play(board, chess.engine.Limit(time=stockfish_time))
         return result.move
     except chess.engine.EngineTerminatedError:
-        print("Stockfish Engine died")
+        print("Stockfish Engine died", end=", ")
     except chess.engine.EngineError:
         print('Stockfish Engine bad state at "{}"'.format(board.fen()))
 
