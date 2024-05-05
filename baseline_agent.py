@@ -1,6 +1,7 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
 from chess import *
+from datetime import datetime
 
 from main import (
     get_next_states_with_capture,
@@ -10,12 +11,14 @@ from main import (
     is_on_edge,
     get_window_string,
     get_next_states,
+    visualize_boards,
 )
 
 from reconchess import *
 from typing import Set
 
 import chess.engine
+import datetime
 import os
 import random
 import time
@@ -43,9 +46,11 @@ def initialise_stockfish():
 
 class BaselineAgent(Player):
     def __init__(self):
-        random_seed = time.time()
-        print(f"The random seed being used is: {random_seed}")
-        random.seed(random_seed)
+        self.random_seed = time.time()
+        random.seed(self.random_seed)
+        print(f"The random seed being used is: {self.random_seed}")
+        print()
+
         self.first_turn = True
         self.my_color: Color = None
         self.opponent_name: str = None
@@ -56,15 +61,20 @@ class BaselineAgent(Player):
         self.my_color = color
         self.opponent_name = opponent_name
         self.possible_states.add(board.fen())
+        with open("seeds.txt", "a") as file:
+            file.write(
+                f"The seed used against {opponent_name} at {datetime.now()} where my color was {self.my_color} is: {self.random_seed}\n"
+            )
 
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
         if self.my_color == WHITE and self.first_turn:
-            self.first_turn = False
             # This is the start turn.
+            self.first_turn = False
             return
         else:
+            print(f"{self.opponent_name} made a move.")
             if not captured_my_piece:
                 # If the opponent didn't capture my piece they could have made any move.
                 possible_states_as_boards = get_strings_as_boards(
@@ -79,6 +89,7 @@ class BaselineAgent(Player):
                         self.possible_states.add(state.fen())
                 return
             else:
+                # If the opponent did capture my piece they could only have made moves that could capture there.
                 possible_states_as_boards = get_strings_as_boards(
                     list(self.possible_states)
                 )
@@ -90,6 +101,7 @@ class BaselineAgent(Player):
                     )
                     for state in states_after_capture:
                         self.possible_states.add(state.fen())
+                return
 
     def choose_sense(
         self,
@@ -118,6 +130,8 @@ class BaselineAgent(Player):
         for state in next_states_with_sensing:
             self.possible_states.add(state.fen())
 
+        return
+
     def choose_move(
         self, move_actions: List[chess.Move], seconds_left: float
     ) -> Optional[chess.Move]:
@@ -138,8 +152,6 @@ class BaselineAgent(Player):
 
         if chosen_move in move_actions:
             return chosen_move
-        else:
-            print(f"Tried to make move: {chosen_move}")
 
         return None
 
@@ -150,6 +162,7 @@ class BaselineAgent(Player):
         captured_opponent_piece: bool,
         capture_square: Optional[Square],
     ):
+        print(f"Baseline Agent made the move: {taken_move}")
         if taken_move is not None:
             possible_states_as_boards = get_strings_as_boards(
                 list(self.possible_states)
@@ -160,6 +173,7 @@ class BaselineAgent(Player):
                 if taken_move in board.pseudo_legal_moves:
                     board.push(taken_move)
                     self.possible_states.add(board.fen())
+            return
 
     def handle_game_end(
         self,
