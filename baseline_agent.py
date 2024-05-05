@@ -103,7 +103,7 @@ class BaselineAgent(Player):
                     for state in states_after_capture:
                         self.possible_states.add(state.fen())
 
-            print(f"{len(self.possible_states)} possible states after enemy move")
+            print(f"{len(self.possible_states)} possible state(s) after enemy move")
 
     def choose_sense(
         self,
@@ -132,7 +132,7 @@ class BaselineAgent(Player):
         for state in next_states_with_sensing:
             self.possible_states.add(state.fen())
 
-        print(f"{len(self.possible_states)} possible states after sensing")
+        print(f"{len(self.possible_states)} possible state(s) after sensing")
         return
 
     def choose_move(
@@ -176,7 +176,7 @@ class BaselineAgent(Player):
                 if taken_move in board.pseudo_legal_moves:
                     board.push(taken_move)
                     self.possible_states.add(board.fen())
-            print(f"{len(self.possible_states)} possible states after moving")
+            print(f"{len(self.possible_states)} possible state(s) after friendly move")
             return
 
     def handle_game_end(
