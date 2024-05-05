@@ -8,6 +8,7 @@ from main import (
     get_strings_as_boards,
     is_on_edge,
     get_window_string,
+    get_next_states,
 )
 from reconchess import *
 from typing import Set
@@ -15,11 +16,11 @@ from typing import Set
 import os
 import random
 
-####################################################################################################################################################################################
+########################################################################################################################
 
 STOCKFISH_ENV_VAR = "STOCKFISH_EXECUTABLE"
 
-####################################################################################################################################################################################
+########################################################################################################################
 
 
 def initialise_stockfish():
@@ -33,34 +34,56 @@ def initialise_stockfish():
     return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
 
-####################################################################################################################################################################################
+########################################################################################################################
 
 
 class BaselineAgent(Player):
     def __init__(self):
+        # random.seed(10)
+        self.first_turn = True
         self.my_color: Color = None
         self.opponent_name: str = None
-        self.my_piece_captured_square: Optional[Square] = None
-        self.current_state: Board = None
         self.possible_states: Set[str] = set()
         self.engine = initialise_stockfish()
 
     def handle_game_start(self, color: Color, board: Board, opponent_name: str):
         self.my_color = color
         self.opponent_name = opponent_name
-        self.current_state = board
-        self.possible_states.add(self.current_state.fen())
+        self.possible_states.add(board.fen())
 
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
-        self.my_piece_captured_square = capture_square
-        if captured_my_piece:
-            self.current_state.remove_piece_at(capture_square)
-            for state in get_next_states_with_capture(
-                self.current_state, capture_square
-            ):
-                self.possible_states.add(state.fen())
+        if self.my_color == WHITE and self.first_turn:
+            self.first_turn = False
+            # This is the start turn.
+            return
+        else:
+            if not captured_my_piece:
+                # If the opponent didn't capture my piece they could have made any move.
+                possible_states_as_boards = get_strings_as_boards(
+                    list(self.possible_states)
+                )
+                self.possible_states = set()
+                for board in possible_states_as_boards:
+                    # It is the opponents turn.
+                    board.turn = not self.my_color
+                    next_states = get_next_states(board)
+                    for state in next_states:
+                        self.possible_states.add(state.fen())
+                return
+            else:
+                possible_states_as_boards = get_strings_as_boards(
+                    list(self.possible_states)
+                )
+                self.possible_states = set()
+                for board in possible_states_as_boards:
+                    board.turn = not self.my_color
+                    states_after_capture = get_next_states_with_capture(
+                        board, capture_square
+                    )
+                    for state in states_after_capture:
+                        self.possible_states.add(state.fen())
 
     def choose_sense(
         self,
@@ -79,29 +102,40 @@ class BaselineAgent(Player):
     def handle_sense_result(
         self, sense_result: List[Tuple[Square, Optional[chess.Piece]]]
     ):
-        for square, piece in sense_result:
-            self.current_state.set_piece_at(square, piece)
-
         window_string = get_window_string(sense_result)
+        possible_states_as_boards = get_strings_as_boards(list(self.possible_states))
+        next_states_with_sensing = get_next_states_with_sensing(
+            possible_states_as_boards, window_string
+        )
 
-        for state in get_next_states_with_sensing(
-            get_strings_as_boards(list(self.possible_states)), window_string
-        ):
+        self.possible_states = set()
+        for state in next_states_with_sensing:
             self.possible_states.add(state.fen())
 
     def choose_move(
         self, move_actions: List[chess.Move], seconds_left: float
     ) -> Optional[chess.Move]:
         while len(self.possible_states) > 10000:
-            self.possible_states.remove(random.choice(self.possible_states))
+            self.possible_states.remove(random.choice(list(self.possible_states)))
 
         stockfish_time = 10 / len(self.possible_states)
+        possible_states_as_boards = get_strings_as_boards(list(self.possible_states))
 
-        return multiple_move_generation(
-            get_strings_as_boards(list(self.possible_states)),
+        for board in possible_states_as_boards:
+            board.turn = self.my_color
+
+        chosen_move = multiple_move_generation(
+            possible_states_as_boards,
             self.engine,
             stockfish_time,
         )
+
+        if chosen_move in move_actions:
+            return chosen_move
+        else:
+            print(f"Tried to make move: {chosen_move}")
+
+        return None
 
     def handle_move_result(
         self,
@@ -111,7 +145,14 @@ class BaselineAgent(Player):
         capture_square: Optional[Square],
     ):
         if taken_move is not None:
-            self.current_state.push(taken_move)
+            possible_states_as_boards = get_strings_as_boards(
+                list(self.possible_states)
+            )
+            self.possible_states = set()
+            for board in possible_states_as_boards:
+                board.turn = self.my_color
+                board.push(taken_move)
+                self.possible_states.add(board.fen())
 
     def handle_game_end(
         self,

@@ -171,8 +171,9 @@ def multiple_move_generation(
 ) -> Optional[Move]:
     move_dict = dict()
     for board in boards:
-        new_move = generate_move(board, stockfish_engine, stockfish_time).uci()
+        new_move = generate_move(board, stockfish_engine, stockfish_time)
         if new_move != None:
+            new_move = new_move.uci()
             if new_move in move_dict:
                 move_dict[new_move] = move_dict[new_move] + 1
             else:
