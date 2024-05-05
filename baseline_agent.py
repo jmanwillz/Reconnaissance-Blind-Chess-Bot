@@ -18,7 +18,6 @@ from reconchess import *
 from typing import Set
 
 import chess.engine
-import datetime
 import os
 import random
 import time
