@@ -1,34 +1,30 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
 from chess import *
+
+from main import (
+    get_next_states_with_capture,
+    get_next_states_with_sensing,
+    multiple_move_generation,
+    get_strings_as_boards,
+    is_on_edge,
+    get_window_string,
+    get_next_states,
+)
+
 from reconchess import *
 from typing import Set
 
+import chess.engine
 import os
 import random
+import time
 
 ########################################################################################################################
 
 STOCKFISH_ENV_VAR = "STOCKFISH_EXECUTABLE"
 
 ########################################################################################################################
-
-
-def is_on_edge(square: Square) -> bool:
-    file, rank = square_file(square), square_rank(square)
-    return file in {0, 7} or rank in {0, 7}
-
-
-def get_window_string(sense_result: List[Tuple[Square, Optional[chess.Piece]]]) -> str:
-    window_str = ""
-    for part in sense_result:
-        window_str += square_name(part[0]) + ":"
-        if part[1] is None:
-            window_str += "?"
-        else:
-            window_str += part[1].symbol()
-        window_str += ";"
-    return window_str[:-1]
 
 
 def initialise_stockfish():
@@ -42,132 +38,14 @@ def initialise_stockfish():
     return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
 
-def make_move(board: Board, input_move: str) -> Board:
-    move = Move.from_uci(input_move)
-    board.push(move)
-    return board
-
-
-def get_castling_moves(board: Board) -> List[Move]:
-    castling_moves = []
-    for move in utilities.without_opponent_pieces(board).generate_castling_moves():
-        if not utilities.is_illegal_castle(board, move):
-            castling_moves.append(move)
-    return castling_moves
-
-
-def get_strings_as_boards(board_strings: List[str]) -> List[Board]:
-    result = []
-    for board_string in board_strings:
-        result.append(get_board(board_string))
-    return result
-
-
-def get_board(fen_string: str) -> Board:
-    return Board(fen_string)
-
-
-def get_possible_moves(board: Board) -> List[Move]:
-    null_move = Move.null()
-    pseudo_legal_moves = list(board.pseudo_legal_moves)
-    castling_moves = get_castling_moves(board)
-
-    possible_moves = set()
-    for move in pseudo_legal_moves:
-        possible_moves.add(move)
-
-    for move in castling_moves:
-        possible_moves.add(move)
-
-    possible_moves.add(null_move)
-
-    return possible_moves
-
-
-def get_next_states_with_sensing(boards: List[Board], window: str) -> List[Board]:
-    result = []
-    for board in boards:
-        is_valid = True
-        for block in window.split(";"):
-            block = block.split(":")
-            square = parse_square(block[0])
-            if block[1] != "?":
-                piece = Piece.from_symbol(block[1])
-            else:
-                piece = None
-            actual_piece = board.piece_at(square)
-            if actual_piece != piece:
-                is_valid = False
-                break
-        if is_valid:
-            result.append(board)
-    return result
-
-
-def get_next_states_with_capture(board: Board, square: Square) -> List[Board]:
-    result = []
-    moves = get_possible_moves(board)
-    for move in moves:
-        if move.to_square == square:
-            result.append(make_move(Board(board.fen()), move.uci()))
-    return result
-
-
-def get_next_states(board: Board) -> List[Board]:
-    result = []
-    moves = get_possible_moves(board)
-    for move in moves:
-        result.append(make_move(Board(board.fen()), move.uci()))
-    return result
-
-
-def generate_move(board: Board, stockfish_engine, stockfish_time=0.1) -> Optional[Move]:
-    enemy_king_square = board.king(not board.turn)
-    if enemy_king_square:
-        enemy_king_attackers = board.attackers(board.turn, enemy_king_square)
-        if enemy_king_attackers:
-            attacker_square = enemy_king_attackers.pop()
-            return chess.Move(attacker_square, enemy_king_square)
-
-    try:
-        board.clear_stack()
-        result = stockfish_engine.play(board, chess.engine.Limit(time=stockfish_time))
-        return result.move
-    except chess.engine.EngineTerminatedError:
-        print("Stockfish Engine died")
-    except chess.engine.EngineError:
-        print('Stockfish Engine bad state at "{}"'.format(board.fen()))
-
-    return None
-
-
-def multiple_move_generation(
-    boards: List[Board], stockfish_engine, stockfish_time=0.1
-) -> Optional[Move]:
-    move_dict = dict()
-    for board in boards:
-        new_move = generate_move(board, stockfish_engine, stockfish_time)
-        if new_move != None:
-            new_move = new_move.uci()
-            if new_move in move_dict:
-                move_dict[new_move] = move_dict[new_move] + 1
-            else:
-                move_dict[new_move] = 1
-
-    if len(move_dict.keys()) == 0:
-        return None
-
-    sorted_move_dict = dict(sorted(move_dict.items()))
-    max_move = max(sorted_move_dict, key=sorted_move_dict.get)
-    return Move.from_uci(max_move)
-
-
 ########################################################################################################################
 
 
 class BaselineAgent(Player):
     def __init__(self):
-        # random.seed(10)
+        random_seed = time.time()
+        print(f"The random seed being used is: {random_seed}")
+        random.seed(random_seed)
         self.first_turn = True
         self.my_color: Color = None
         self.opponent_name: str = None
@@ -279,8 +157,9 @@ class BaselineAgent(Player):
             self.possible_states = set()
             for board in possible_states_as_boards:
                 board.turn = self.my_color
-                board.push(taken_move)
-                self.possible_states.add(board.fen())
+                if taken_move in board.pseudo_legal_moves:
+                    board.push(taken_move)
+                    self.possible_states.add(board.fen())
 
     def handle_game_end(
         self,
