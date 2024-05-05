@@ -73,9 +73,9 @@ class BaselineAgent(Player):
             self.first_turn = False
             return
         else:
-            print(f"The opponent ({self.opponent_name}) made a move.")
             if not captured_my_piece:
                 # If the opponent didn't capture my piece they could have made any move.
+                print(f"{self.opponent_name} made a move")
                 possible_states_as_boards = get_strings_as_boards(
                     list(self.possible_states)
                 )
@@ -86,11 +86,11 @@ class BaselineAgent(Player):
                     next_states = get_next_states(board)
                     for state in next_states:
                         self.possible_states.add(state.fen())
-                print(f"There are now {len(self.possible_states)} possible states.")
-                return
             else:
                 # If the opponent did capture my piece they could only have made moves that could capture there.
-                print(f"The opponent took a piece at square: {square_name(capture_square)}")
+                print(
+                    f"{self.opponent_name} took a piece at {square_name(capture_square)}"
+                )
                 possible_states_as_boards = get_strings_as_boards(
                     list(self.possible_states)
                 )
@@ -102,8 +102,8 @@ class BaselineAgent(Player):
                     )
                     for state in states_after_capture:
                         self.possible_states.add(state.fen())
-                print(f"There are now {len(self.possible_states)} possible states.")
-                return
+
+            print(f"{len(self.possible_states)} possible states after enemy move")
 
     def choose_sense(
         self,
@@ -132,7 +132,7 @@ class BaselineAgent(Player):
         for state in next_states_with_sensing:
             self.possible_states.add(state.fen())
 
-        print(f"After sensing there are now {len(self.possible_states)} possible states.")
+        print(f"{len(self.possible_states)} possible states after sensing")
         return
 
     def choose_move(
@@ -165,7 +165,7 @@ class BaselineAgent(Player):
         captured_opponent_piece: bool,
         capture_square: Optional[Square],
     ):
-        print(f"Baseline Agent made the move: {taken_move}")
+        print(f"BaselineAgent made a move ({taken_move})")
         if taken_move is not None:
             possible_states_as_boards = get_strings_as_boards(
                 list(self.possible_states)
@@ -176,7 +176,7 @@ class BaselineAgent(Player):
                 if taken_move in board.pseudo_legal_moves:
                     board.push(taken_move)
                     self.possible_states.add(board.fen())
-            print(f"After moving there are {len(self.possible_states)} possible states.")
+            print(f"{len(self.possible_states)} possible states after moving")
             return
 
     def handle_game_end(
