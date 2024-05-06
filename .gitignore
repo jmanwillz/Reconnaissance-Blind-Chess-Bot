@@ -1,4 +1,10 @@
-time_trial
 __pycache__
+.idea
+.run
 .vscode
+states
+time_trial
+
 *.json
+
+seeds.txt

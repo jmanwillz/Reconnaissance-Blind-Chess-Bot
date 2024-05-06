@@ -10,7 +10,7 @@ from main import (
     get_possible_moves_as_strings,
     get_next_states,
     get_boards_as_strings,
-    get_next_states_with_captures,
+    get_next_states_with_capture,
     get_next_states_with_sensing,
     generate_move,
     initialise_stockfish,
@@ -200,10 +200,10 @@ def part_2_next_state_prediction_with_captures():
     board_2 = get_board(fen_string_2)
 
     states_1 = get_boards_as_strings(
-        get_next_states_with_captures(board_1, parse_square(capture_block_1))
+        get_next_states_with_capture(board_1, parse_square(capture_block_1))
     )
     states_2 = get_boards_as_strings(
-        get_next_states_with_captures(board_2, parse_square(capture_block_2))
+        get_next_states_with_capture(board_2, parse_square(capture_block_2))
     )
 
     states_1_result = solution_1.split("\n")

@@ -55,6 +55,12 @@ To face off a bot against the trout bot run the following:
 rc-bot-match reconchess.bots.random_bot trout_bot.py
 ```
 
+To face off a trout bot against the baseline agent run the following (the first bot is the white bot):
+
+```bash
+rc-bot-match baseline_agent.py reconchess.bots.trout_bot
+```
+
 To replay a game from the game history file use the following command:
 
 ```bash
