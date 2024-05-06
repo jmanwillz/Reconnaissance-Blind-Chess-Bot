@@ -1,10 +1,12 @@
 __pycache__
 .idea
 .run
-.vscode
+.vscode/*
 states
 time_trial
 
 *.json
 
 seeds.txt
+
+!/.vscode/launch.json
