@@ -13,6 +13,7 @@ from main import (
 )
 
 from chess import *
+from datetime import datetime
 from reconchess import *
 from typing import Set
 
@@ -58,6 +59,11 @@ class BaselineAgent(Player):
         if self.my_color:
             color = "White"
 
+        with open("seeds.txt", "a") as file:
+            file.write(
+                f"The seed used against {self.opponent_name} at {datetime.now()} where my color was {self.my_color} is: {self.random_seed}\n"
+            )
+
         print(f"We are playing as: \t{color}")
         print(f"Random seed: \t\t{self.random_seed}")
         print(f"Opponent name: \t\t{self.opponent_name}")
@@ -88,7 +94,12 @@ class BaselineAgent(Player):
 
             self.possible_states.update(get_boards_as_strings(new_boards))
 
-        print(f"Made a move: \t\t{self.opponent_name}")
+        if captured_my_piece:
+            capture_square_name = square_name(capture_square)
+        else:
+            capture_square_name = "None"
+
+        print(f"Made a move: \t\t{self.opponent_name} ({capture_square_name})")
         print(f"Before: \t\t{len(possible_boards)}")
         print(f"After:  \t\t{len(self.possible_states)}")
         print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
@@ -100,12 +111,13 @@ class BaselineAgent(Player):
         move_actions: List[Move],
         seconds_left: float,
     ) -> Optional[Square]:
-        sense_choice: Optional[Square] = None
-        while (len(sense_actions) > 0) and (sense_choice == None):
-            temporary_sense_choice = random.choice(sense_actions)
-            if not is_on_edge(temporary_sense_choice):
-                sense_choice = temporary_sense_choice
-        return sense_choice
+        while True:
+            if len(sense_actions) == 0:
+                return None
+            sense_choice: Square = random.choice(sense_actions)
+            sense_actions.remove(sense_choice)
+            if not is_on_edge(sense_choice):
+                return sense_choice
 
     def handle_sense_result(self, sense_result: List[Tuple[Square, Optional[Piece]]]):
         window_string: str = get_window_string(sense_result)

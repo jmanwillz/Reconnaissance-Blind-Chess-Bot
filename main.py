@@ -18,7 +18,7 @@ STOCKFISH_ENV_VAR = "STOCKFISH_EXECUTABLE"
 
 def visualize_boards(boards: List[Board]):
     os.makedirs("states", exist_ok=True)
-    for board in boards:
+    for index, board in enumerate(boards):
         boardImage = fenToImage(
             fen=board.fen(),
             squarelength=100,
@@ -28,7 +28,7 @@ def visualize_boards(boards: List[Board]):
         )
         boardImage.save(
             os.path.join(
-                "states", f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"
+                "states", f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{index}.png"
             )
         )
 
