@@ -36,4 +36,4 @@ arg1=$1
 arg2=$2
 
 # Run the Python script with the provided arguments
-python -m debugpy --listen localhost:5678 --wait-for-client -m reconchess.scripts.rc_bot_match "$arg1" "$arg2" --seconds_per_player 900000
+python -m debugpy --listen localhost:8765 --wait-for-client -m reconchess.scripts.rc_bot_match "$arg1" "$arg2" --seconds_per_player 900000

@@ -33,7 +33,7 @@
       "name": "Python Debugger: Remote Attach",
       "type": "debugpy",
       "request": "attach",
-      "connect": { "host": "localhost", "port": 5678 },
+      "connect": { "host": "localhost", "port": 8765 },
       "pathMappings": [{ "localRoot": "${workspaceFolder}", "remoteRoot": "." }]
     },
     {
