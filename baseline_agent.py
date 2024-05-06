@@ -194,9 +194,9 @@ class BaselineAgent(Player):
     ):
         if (winner_color != None) and (win_reason != None):
             if winner_color == self.my_color:
-                print(f"We won and the reason was {win_reason.value}")
+                print(f"We won and the reason was {win_reason.name}")
             else:
-                print(f"The opponent won and the reason was {win_reason.value}")
+                print(f"The opponent won and the reason was {win_reason.name}")
 
         try:
             self.engine.quit()

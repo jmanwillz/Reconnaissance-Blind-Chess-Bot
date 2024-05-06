@@ -26,7 +26,11 @@ def visualize_boards(boards: List[Board]):
             darkColor="#D18B47",
             lightColor="#FFCE9E",
         )
-        boardImage.save(os.path.join("states", f"{datetime.now()}.png"))
+        boardImage.save(
+            os.path.join(
+                "states", f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"
+            )
+        )
 
 
 def get_board(fen_string: str) -> Board:
