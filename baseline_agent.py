@@ -138,6 +138,9 @@ class BaselineAgent(Player):
     def choose_move(
         self, move_actions: List[chess.Move], seconds_left: float
     ) -> Optional[chess.Move]:
+        if len(self.possible_states) == 0:
+            return None
+
         while len(self.possible_states) > 10000:
             self.possible_states.remove(random.choice(list(self.possible_states)))
 
