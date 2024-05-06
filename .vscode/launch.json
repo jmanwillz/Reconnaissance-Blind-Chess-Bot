@@ -30,6 +30,13 @@
       "args": "--seconds_per_player 900000 reconchess.bots.random_bot baseline_agent.py"
     },
     {
+      "name": "Python Debugger: Remote Attach",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "localhost", "port": 5678 },
+      "pathMappings": [{ "localRoot": "${workspaceFolder}", "remoteRoot": "." }]
+    },
+    {
       "name": "Play Baseline",
       "type": "debugpy",
       "request": "launch",
