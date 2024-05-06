@@ -9,6 +9,7 @@ from main import (
     get_window_string,
     is_on_edge,
     multiple_move_generation,
+    visualize_boards,
 )
 
 from chess import *
@@ -52,11 +53,22 @@ class BaselineAgent(Player):
         self.turn_count = 0
         random.seed(self.random_seed)
 
+    def log_start(self):
+        color = "Black"
+        if self.my_color:
+            color = "White"
+
+        print(f"We are playing as: \t{color}")
+        print(f"Random seed: \t\t{self.random_seed}")
+        print(f"Opponent name: \t\t{self.opponent_name}")
+        print()
+
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
         self.turn_count += 1
         if self.first_turn and self.my_color == WHITE:
+            self.log_start()
             self.first_turn = False
             return
 
@@ -75,6 +87,12 @@ class BaselineAgent(Player):
                 new_boards = get_next_states(board)
 
             self.possible_states.update(get_boards_as_strings(new_boards))
+
+        print(f"Made a move: \t\t{self.opponent_name}")
+        print(f"Before: \t\t{len(possible_boards)}")
+        print(f"After:  \t\t{len(self.possible_states)}")
+        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
+        print()
 
     def choose_sense(
         self,
@@ -98,12 +116,18 @@ class BaselineAgent(Player):
             )
         )
 
+        print(f"Sensing: \t\t{window_string}")
+        print(f"Before: \t\t{len(possible_boards)}")
+        print(f"After:  \t\t{len(self.possible_states)}")
+        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
+        print()
+
     def choose_move(
         self, move_actions: List[Move], seconds_left: float
     ) -> Optional[Move]:
         if len(self.possible_states) == 0:
             return None
-        if len(self.possible_states) > 10000:
+        while len(self.possible_states) > 10000:
             self.possible_states.remove(random.choice(list(self.possible_states)))
 
         stockfish_time = 10 / len(self.possible_states)
@@ -131,7 +155,7 @@ class BaselineAgent(Player):
         capture_square: Optional[Square],
     ):
         if taken_move == None:
-            return
+            tmp = 1 + 1
 
         possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
         self.possible_states = set()
@@ -156,6 +180,12 @@ class BaselineAgent(Player):
             candidate_board.push(taken_move)
             self.possible_states.add(candidate_board.fen())
 
+        print(f"Made a move: \t\t{type(self).__name__} ({taken_move})")
+        print(f"Before: \t\t{len(possible_boards)}")
+        print(f"After:  \t\t{len(self.possible_states)}")
+        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
+        print()
+
     def handle_game_end(
         self,
         winner_color: Optional[Color],
@@ -163,7 +193,10 @@ class BaselineAgent(Player):
         game_history: GameHistory,
     ):
         if (winner_color != None) and (win_reason != None):
-            print(f"The winner was {winner_color} and the reason was {win_reason}")
+            if winner_color == self.my_color:
+                print(f"We won and the reason was {win_reason.value}")
+            else:
+                print(f"The opponent won and the reason was {win_reason.value}")
 
         try:
             self.engine.quit()
