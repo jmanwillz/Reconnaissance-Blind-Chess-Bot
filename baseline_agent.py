@@ -189,6 +189,11 @@ class BaselineAgent(Player):
                 if candidate_board.color_at(capture_square) != (not self.my_color):
                     continue
 
+            # If candidate board has piece there, then it should record as capture.
+            if candidate_board.color_at(taken_move.to_square) == (not self.my_color):
+                if not captured_opponent_piece:
+                    continue
+
             candidate_board.push(taken_move)
             self.possible_states.add(candidate_board.fen())
 
