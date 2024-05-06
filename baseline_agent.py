@@ -1,19 +1,19 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
-from chess import *
-from datetime import datetime
-
 from main import (
+    get_boards_as_strings,
+    get_next_states,
     get_next_states_with_capture,
     get_next_states_with_sensing,
-    multiple_move_generation,
     get_strings_as_boards,
-    is_on_edge,
     get_window_string,
-    get_next_states,
+    is_on_edge,
+    multiple_move_generation,
     visualize_boards,
 )
 
+from chess import *
+from datetime import datetime
 from reconchess import *
 from typing import Set
 
@@ -44,71 +44,69 @@ def initialise_stockfish():
 
 
 class BaselineAgent(Player):
-    def __init__(self):
+    def handle_game_start(self, color: Color, board: Board, opponent_name: str):
+        self.engine = initialise_stockfish()
+        self.first_turn = True
+        self.my_color: Color = color
+        self.opponent_name: str = opponent_name
+        self.possible_states: Set[Board] = {board.fen()}
         self.random_seed = time.time()
         random.seed(self.random_seed)
-        print(f"The random seed being used is: {self.random_seed}")
-        print()
 
-        self.first_turn = True
-        self.my_color: Color = None
-        self.opponent_name: str = None
-        self.possible_states: Set[str] = set()
-        self.engine = initialise_stockfish()
+    def log_start(self):
+        color = "Black"
+        if self.my_color:
+            color = "White"
 
-    def handle_game_start(self, color: Color, board: Board, opponent_name: str):
-        self.my_color = color
-        self.opponent_name = opponent_name
-        self.possible_states.add(board.fen())
         with open("seeds.txt", "a") as file:
             file.write(
-                f"The seed used against {opponent_name} at {datetime.now()} where my color was {self.my_color} is: {self.random_seed}\n"
+                f"The seed used against {self.opponent_name} at {datetime.now()} where my color was {self.my_color} is: {self.random_seed}\n"
             )
+
+        print(f"We are playing as: \t{color}")
+        print(f"Random seed: \t\t{self.random_seed}")
+        print(f"Opponent name: \t\t{self.opponent_name}")
+        print()
 
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
-        if self.my_color == WHITE and self.first_turn:
-            # This is the start turn.
+        if self.first_turn and self.my_color == WHITE:
+            self.log_start()
             self.first_turn = False
             return
-        else:
-            if not captured_my_piece:
-                # If the opponent didn't capture my piece they could have made any move.
-                print(f"{self.opponent_name} made a move")
-                possible_states_as_boards = get_strings_as_boards(
-                    list(self.possible_states)
-                )
-                self.possible_states = set()
-                for board in possible_states_as_boards:
-                    # It is the opponents turn.
-                    board.turn = not self.my_color
-                    next_states = get_next_states(board)
-                    for state in next_states:
-                        self.possible_states.add(state.fen())
-            else:
-                # If the opponent did capture my piece they could only have made moves that could capture there.
-                print(
-                    f"{self.opponent_name} took a piece at {square_name(capture_square)}"
-                )
-                possible_states_as_boards = get_strings_as_boards(
-                    list(self.possible_states)
-                )
-                self.possible_states = set()
-                for board in possible_states_as_boards:
-                    board.turn = not self.my_color
-                    states_after_capture = get_next_states_with_capture(
-                        board, capture_square
-                    )
-                    for state in states_after_capture:
-                        self.possible_states.add(state.fen())
 
-            print(f"{len(self.possible_states)} possible state(s) after enemy move")
+        possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
+        self.possible_states = set()
+
+        for board in possible_boards:
+            board.turn = not self.my_color
+            new_boards: List[Board] = []
+
+            if captured_my_piece:
+                # The opponent captured a piece of ours.
+                new_boards = get_next_states_with_capture(board, capture_square)
+            else:
+                # The opponent did not capture a piece of ours.
+                new_boards = get_next_states(board)
+
+            self.possible_states.update(get_boards_as_strings(new_boards))
+
+        if captured_my_piece:
+            capture_square_name = square_name(capture_square)
+        else:
+            capture_square_name = "None"
+
+        print(f"Made a move: \t\t{self.opponent_name} ({capture_square_name})")
+        print(f"Before: \t\t{len(possible_boards)}")
+        print(f"After:  \t\t{len(self.possible_states)}")
+        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
+        print()
 
     def choose_sense(
         self,
         sense_actions: List[Square],
-        move_actions: List[chess.Move],
+        move_actions: List[Move],
         seconds_left: float,
     ) -> Optional[Square]:
         while True:
@@ -119,39 +117,37 @@ class BaselineAgent(Player):
             if not is_on_edge(sense_choice):
                 return sense_choice
 
-    def handle_sense_result(
-        self, sense_result: List[Tuple[Square, Optional[chess.Piece]]]
-    ):
-        window_string = get_window_string(sense_result)
-        possible_states_as_boards = get_strings_as_boards(list(self.possible_states))
-        next_states_with_sensing = get_next_states_with_sensing(
-            possible_states_as_boards, window_string
+    def handle_sense_result(self, sense_result: List[Tuple[Square, Optional[Piece]]]):
+        window_string: str = get_window_string(sense_result)
+        possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
+        self.possible_states = set(
+            get_boards_as_strings(
+                get_next_states_with_sensing(possible_boards, window_string)
+            )
         )
 
-        self.possible_states = set()
-        for state in next_states_with_sensing:
-            self.possible_states.add(state.fen())
-
-        print(f"{len(self.possible_states)} possible state(s) after sensing")
-        return
+        print(f"Sensing: \t\t{window_string}")
+        print(f"Before: \t\t{len(possible_boards)}")
+        print(f"After:  \t\t{len(self.possible_states)}")
+        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
+        print()
 
     def choose_move(
-        self, move_actions: List[chess.Move], seconds_left: float
-    ) -> Optional[chess.Move]:
+        self, move_actions: List[Move], seconds_left: float
+    ) -> Optional[Move]:
         if len(self.possible_states) == 0:
             return None
-
         while len(self.possible_states) > 10000:
             self.possible_states.remove(random.choice(list(self.possible_states)))
 
         stockfish_time = 10 / len(self.possible_states)
-        possible_states_as_boards = get_strings_as_boards(list(self.possible_states))
+        possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
 
-        for board in possible_states_as_boards:
+        for board in possible_boards:
             board.turn = self.my_color
 
         chosen_move = multiple_move_generation(
-            possible_states_as_boards,
+            possible_boards,
             self.engine,
             stockfish_time,
         )
@@ -163,24 +159,47 @@ class BaselineAgent(Player):
 
     def handle_move_result(
         self,
-        requested_move: Optional[chess.Move],
-        taken_move: Optional[chess.Move],
+        requested_move: Optional[Move],
+        taken_move: Optional[Move],
         captured_opponent_piece: bool,
         capture_square: Optional[Square],
     ):
-        print(f"BaselineAgent made a move ({taken_move})")
-        if taken_move is not None:
-            possible_states_as_boards = get_strings_as_boards(
-                list(self.possible_states)
-            )
-            self.possible_states = set()
-            for board in possible_states_as_boards:
-                board.turn = self.my_color
-                if taken_move in board.pseudo_legal_moves:
-                    board.push(taken_move)
-                    self.possible_states.add(board.fen())
-            print(f"{len(self.possible_states)} possible state(s) after friendly move")
-            return
+        if taken_move == None:
+            print("There was a none move taken.")
+
+        possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
+        self.possible_states = set()
+
+        for candidate_board in possible_boards:
+            candidate_board.turn = self.my_color
+
+            # If the taken move can't be made, the board is illegal.
+            if taken_move not in candidate_board.pseudo_legal_moves:
+                continue
+
+            # If the requested move and taken move are different, the requested move should be illegal.
+            if requested_move != taken_move:
+                if requested_move in candidate_board.pseudo_legal_moves:
+                    continue
+
+            # If I captured an opponent piece, there should be a piece on that block of the opponents color.
+            if captured_opponent_piece:
+                if candidate_board.color_at(capture_square) != (not self.my_color):
+                    continue
+
+            # If candidate board has piece there, then it should record as capture.
+            if candidate_board.color_at(taken_move.to_square) == (not self.my_color):
+                if not captured_opponent_piece:
+                    continue
+
+            candidate_board.push(taken_move)
+            self.possible_states.add(candidate_board.fen())
+
+        print(f"Made a move: \t\t{type(self).__name__} ({taken_move})")
+        print(f"Before: \t\t{len(possible_boards)}")
+        print(f"After:  \t\t{len(self.possible_states)}")
+        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
+        print()
 
     def handle_game_end(
         self,
@@ -188,7 +207,13 @@ class BaselineAgent(Player):
         win_reason: Optional[WinReason],
         game_history: GameHistory,
     ):
+        if (winner_color != None) and (win_reason != None):
+            if winner_color == self.my_color:
+                print(f"We won and the reason was {win_reason.name}")
+            else:
+                print(f"The opponent won and the reason was {win_reason.name}")
+
         try:
             self.engine.quit()
         except chess.engine.EngineTerminatedError:
-            pass
+            print(f"The engine terminated with an error.")

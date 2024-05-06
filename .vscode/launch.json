@@ -1,0 +1,75 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Baseline vs Trout",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_bot_match",
+      "args": "--seconds_per_player 900000 baseline_agent.py reconchess.bots.trout_bot"
+    },
+    {
+      "name": "Baseline vs Random Bot",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_bot_match",
+      "args": "--seconds_per_player 900000 baseline_agent.py reconchess.bots.random_bot"
+    },
+    {
+      "name": "Trout vs Baseline",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_bot_match",
+      "args": "--seconds_per_player 900000 reconchess.bots.trout_bot baseline_agent.py"
+    },
+    {
+      "name": "Random Bot vs Baseline",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_bot_match",
+      "args": "--seconds_per_player 900000 reconchess.bots.random_bot baseline_agent.py"
+    },
+    {
+      "name": "Python Debugger: Remote Attach",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "localhost", "port": 8765 },
+      "pathMappings": [{ "localRoot": "${workspaceFolder}", "remoteRoot": "." }]
+    },
+    {
+      "name": "Play Baseline",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_play",
+      "args": "baseline_agent.py"
+    },
+    {
+      "name": "Play Trout",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_play",
+      "args": "reconchess.bots.trout_bot"
+    },
+    {
+      "name": "Play Random",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_play",
+      "args": "reconchess.bots.random_bot"
+    },
+    {
+      "name": "Main",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "main.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Test",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "test.py",
+      "console": "integratedTerminal"
+    }
+  ]
+}
