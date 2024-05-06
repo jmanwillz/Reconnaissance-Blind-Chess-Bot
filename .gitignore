@@ -6,7 +6,7 @@ states
 time_trial
 
 *.json
-
-seeds.txt
+*.txt
 
 !/.vscode/launch.json
+!/requirements.txt

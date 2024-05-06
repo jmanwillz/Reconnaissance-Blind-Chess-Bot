@@ -165,7 +165,7 @@ class BaselineAgent(Player):
         capture_square: Optional[Square],
     ):
         if taken_move == None:
-            raise Exception(f"Number of possible states: {len(self.possible_states)}")
+            print("There was a none move taken.")
 
         possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
         self.possible_states = set()
