@@ -51,7 +51,6 @@ class BaselineAgent(Player):
         self.opponent_name: str = opponent_name
         self.possible_states: Set[Board] = {board.fen()}
         self.random_seed = time.time()
-        self.turn_count = 0
         random.seed(self.random_seed)
 
     def log_start(self):
@@ -72,7 +71,6 @@ class BaselineAgent(Player):
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
-        self.turn_count += 1
         if self.first_turn and self.my_color == WHITE:
             self.log_start()
             self.first_turn = False
