@@ -183,9 +183,9 @@ def generate_move(board: Board, stockfish_engine, stockfish_time=0.1) -> Optiona
         result = stockfish_engine.play(board, chess.engine.Limit(time=stockfish_time))
         return result.move
     except chess.engine.EngineTerminatedError:
-        print("Stockfish Engine died", end=", ")
+        print("Agent: Stockfish Engine Died")
     except chess.engine.EngineError:
-        print('Stockfish Engine bad state at "{}"'.format(board.fen()))
+        print(f"Agent: Stockfish Engine bad state at {board.fen()}")
 
     return None
 
