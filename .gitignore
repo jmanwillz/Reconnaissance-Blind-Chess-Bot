@@ -2,6 +2,7 @@ __pycache__
 .idea
 .run
 .vscode/*
+history
 states
 time_trial
 
