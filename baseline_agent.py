@@ -53,6 +53,7 @@ class BaselineAgent(Player):
         self.opponent_name: str = opponent_name
         self.possible_states: Set[Board] = {board.fen()}
         self.random_seed = time.time()
+        self.start_time = datetime.now()
         random.seed(self.random_seed)
 
     def log_start(self):
@@ -72,6 +73,7 @@ class BaselineAgent(Player):
 
     def log_state_change(self, boards_before: List[Board]):
         delta = len(self.possible_states) - len(boards_before)
+        current_time = datetime.now()
 
         print(f"Before: \t\t{len(boards_before)}")
 
@@ -83,6 +85,13 @@ class BaselineAgent(Player):
             print(f"Change: \t\t{bcolors.OKBLUE}{delta}{bcolors.ENDC}")
 
         print(f"After:  \t\t{len(self.possible_states)}")
+        print()
+        print(
+            f"Time:   \t\t{bcolors.UNDERLINE}{current_time.strftime('%H:%M:%S')}{bcolors.ENDC}"
+        )
+        print(
+            f"Elapsed time: \t\t{bcolors.UNDERLINE}{current_time - self.start_time}{bcolors.ENDC}"
+        )
         print()
 
     def handle_opponent_move_result(
@@ -208,7 +217,7 @@ class BaselineAgent(Player):
             candidate_board.push(taken_move)
             self.possible_states.add(candidate_board.fen())
 
-        print(f"Move (Me): \t\t{type(self).__name__} ({taken_move})")
+        print(f"Move (Me): \t\t{type(self).__name__} (Move: {taken_move})")
         self.log_state_change(possible_boards)
 
     def handle_game_end(
