@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define your Python command with arguments
-rc_bot_match_command="rc-bot-match"
+rc_bot_match_command="./run_remote_debugger.sh"
 
 # Define different sets of arguments
 argument_sets=(
@@ -9,6 +9,7 @@ argument_sets=(
     "baseline_agent.py reconchess.bots.random_bot"
     "reconchess.bots.trout_bot baseline_agent.py"
     "reconchess.bots.random_bot baseline_agent.py"
+    "baseline_agent.py baseline_agent.py"
     )
 
 # Number of times to run each argument set
@@ -28,7 +29,7 @@ for arguments in "${argument_sets[@]}"; do
         
         output_file="output_${timestamp}_${arguments_formatted}.txt"
         
-        echo "Run $i"
-        $rc_bot_match_command $arguments >> "$output_file"
+        echo "Run ${i}: Waiting for debugger"
+        $rc_bot_match_command $arguments
     done
 done

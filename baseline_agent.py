@@ -12,6 +12,8 @@ from main import (
     visualize_boards,
 )
 
+from test import bcolors
+
 from chess import *
 from datetime import datetime
 from reconchess import *
@@ -68,6 +70,21 @@ class BaselineAgent(Player):
         print(f"Opponent name: \t\t{self.opponent_name}")
         print()
 
+    def log_state_change(self, boards_before: List[Board]):
+        delta = len(self.possible_states) - len(boards_before)
+
+        print(f"Before: \t\t{len(boards_before)}")
+
+        if delta > 0:
+            print(f"Change: \t\t{bcolors.FAIL}+{delta}{bcolors.ENDC}")
+        elif delta < 0:
+            print(f"Change: \t\t{bcolors.OKGREEN}{delta}{bcolors.ENDC}")
+        else:
+            print(f"Change: \t\t{bcolors.OKBLUE}{delta}{bcolors.ENDC}")
+
+        print(f"After:  \t\t{len(self.possible_states)}")
+        print()
+
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
@@ -97,11 +114,10 @@ class BaselineAgent(Player):
         else:
             capture_square_name = "None"
 
-        print(f"Made a move: \t\t{self.opponent_name} ({capture_square_name})")
-        print(f"Before: \t\t{len(possible_boards)}")
-        print(f"After:  \t\t{len(self.possible_states)}")
-        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
-        print()
+        print(
+            f"Move (Opponent): \t{self.opponent_name} (Capture: {capture_square_name})"
+        )
+        self.log_state_change(possible_boards)
 
     def choose_sense(
         self,
@@ -126,11 +142,8 @@ class BaselineAgent(Player):
             )
         )
 
-        print(f"Sensing: \t\t{window_string}")
-        print(f"Before: \t\t{len(possible_boards)}")
-        print(f"After:  \t\t{len(self.possible_states)}")
-        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
-        print()
+        print(f"Sensing (Me): \t\t{window_string}")
+        self.log_state_change(possible_boards)
 
     def choose_move(
         self, move_actions: List[Move], seconds_left: float
@@ -195,11 +208,8 @@ class BaselineAgent(Player):
             candidate_board.push(taken_move)
             self.possible_states.add(candidate_board.fen())
 
-        print(f"Made a move: \t\t{type(self).__name__} ({taken_move})")
-        print(f"Before: \t\t{len(possible_boards)}")
-        print(f"After:  \t\t{len(self.possible_states)}")
-        print(f"Change: \t\t{len(self.possible_states) - len(possible_boards)}")
-        print()
+        print(f"Move (Me): \t\t{type(self).__name__} ({taken_move})")
+        self.log_state_change(possible_boards)
 
     def handle_game_end(
         self,
