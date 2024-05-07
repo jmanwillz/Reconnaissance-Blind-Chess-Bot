@@ -186,9 +186,6 @@ class BaselineAgent(Player):
         captured_opponent_piece: bool,
         capture_square: Optional[Square],
     ):
-        if taken_move == None:
-            print("There was a none move taken.")
-
         possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
         self.possible_states = set()
 
@@ -197,7 +194,8 @@ class BaselineAgent(Player):
 
             # If the taken move can't be made, the board is illegal.
             if taken_move not in candidate_board.pseudo_legal_moves:
-                continue
+                if taken_move != None:
+                    continue
 
             # If the requested move and taken move are different, the requested move should be illegal.
             if requested_move != taken_move:
@@ -210,11 +208,15 @@ class BaselineAgent(Player):
                     continue
 
             # If candidate board has piece there, then it should record as capture.
-            if candidate_board.color_at(taken_move.to_square) == (not self.my_color):
-                if not captured_opponent_piece:
-                    continue
+            opponent_color = not self.my_color
+            if taken_move != None:
+                if candidate_board.color_at(taken_move.to_square) == opponent_color:
+                    if not captured_opponent_piece:
+                        continue
 
-            candidate_board.push(taken_move)
+            if taken_move != None:
+                candidate_board.push(taken_move)
+            candidate_board.turn = not self.my_color
             self.possible_states.add(candidate_board.fen())
 
         print(f"Move (Me): \t\t{type(self).__name__} (Move: {taken_move})")
