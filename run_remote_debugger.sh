@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the allowed values for arguments
-allowed_values=("baseline_agent.py" "reconchess.bots.trout_bot" "reconchess.bots.random_bot")
+allowed_values=("baseline_agent.py" "reconchess.bots.trout_bot" "reconchess.bots.random_bot" "reconchess.bots.attacker_bot")
 
 # Function to check if a value is in the allowed list
 is_allowed_value() {
