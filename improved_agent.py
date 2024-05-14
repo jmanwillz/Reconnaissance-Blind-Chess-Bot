@@ -50,6 +50,7 @@ class ImprovedAgent(Player):
         self.engine = initialise_stockfish()
         self.first_turn = True
         self.my_color: Color = color
+        self.my_piece_captured_square: Optional[Square] = None
         self.opponent_name: str = opponent_name
         self.possible_states: Set[Board] = {board.fen()}
         self.random_seed = time.time()
@@ -97,6 +98,7 @@ class ImprovedAgent(Player):
     def handle_opponent_move_result(
         self, captured_my_piece: bool, capture_square: Optional[Square]
     ):
+        self.my_piece_captured_square = capture_square
         if self.first_turn and self.my_color == WHITE:
             self.log_start()
             self.first_turn = False
@@ -134,6 +136,16 @@ class ImprovedAgent(Player):
         move_actions: List[Move],
         seconds_left: float,
     ) -> Optional[Square]:
+        # if our piece was just captured, sense where it was captured
+        if self.my_piece_captured_square:
+            return self.my_piece_captured_square
+
+        # if we might capture a piece when we move, sense where the capture will occur
+        future_move = self.choose_move(move_actions, seconds_left)
+        if future_move is not None:
+            return future_move.to_square
+
+        # otherwise, just randomly choose a sense action that isn't on the edge of the board
         while True:
             if len(sense_actions) == 0:
                 return None
