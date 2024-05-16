@@ -1,7 +1,9 @@
 __pycache__
+.conda
 .idea
 .run
 .vscode/*
+history
 states
 time_trial
 
