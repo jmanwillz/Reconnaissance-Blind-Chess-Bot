@@ -33,6 +33,76 @@ def visualize_boards(boards: List[Board]):
         )
 
 
+def get_square_not_on_edge(square_on_edge: Square) -> Square:
+    rank = square_rank(square_on_edge)
+    file = square_file(square_on_edge)
+
+    if rank == 0:
+        rank += 1
+    elif rank == 7:
+        rank -= 1
+
+    if file == 0:
+        file += 1
+    elif file == 7:
+        file -= 1
+
+    return square(file, rank)
+
+
+def get_best_sense_from_piece_distribution(
+    piece_distribution, number_of_states: int
+) -> Optional[Square]:
+    for square in piece_distribution.keys():
+        array_length = len(piece_distribution[square])
+        set_of_pieces = set(piece_distribution[square])
+        set_length = len(set_of_pieces)
+        piece_distribution[square] = {
+            "array": piece_distribution[square],
+            "array_length": array_length,
+            "set": set_of_pieces,
+            "set_length": set_length,
+        }
+
+    ordered_squares = [
+        k
+        for k, _ in sorted(
+            piece_distribution.items(),
+            key=lambda item: item[1]["set_length"],
+            reverse=True,
+        )
+    ]
+
+    for square in ordered_squares:
+        if (piece_distribution[square]["array_length"] == number_of_states) and (
+            piece_distribution[square]["set_length"] == 1
+        ):
+            continue
+
+        if piece_distribution[square]["set_length"] > 1:
+            if is_on_edge(square):
+                return get_square_not_on_edge(square)
+            return square
+
+    return None
+
+
+def merge_piece_distribution_with_new_map(
+    piece_distribution: dict, new_map: dict, color: Color
+) -> dict:
+    result = dict()
+    for key in piece_distribution.keys():
+        result[key] = piece_distribution[key]
+    for key in new_map.keys():
+        if key in result.keys():
+            if new_map[key].color == color:
+                result[key].append(new_map[key])
+        else:
+            if new_map[key].color == color:
+                result[key] = [new_map[key]]
+    return result
+
+
 def get_board(fen_string: str) -> Board:
     return Board(fen_string)
 

@@ -9,6 +9,8 @@ from main import (
     get_window_string,
     is_on_edge,
     multiple_move_generation,
+    merge_piece_distribution_with_new_map,
+    get_best_sense_from_piece_distribution,
     visualize_boards,
 )
 
@@ -140,7 +142,22 @@ class ImprovedAgent(Player):
         if self.my_piece_captured_square:
             return self.my_piece_captured_square
 
-        # if we might capture a piece when we move, sense where the capture will occur
+        possible_boards: List[Board] = get_strings_as_boards(list(self.possible_states))
+        piece_distribution = dict()
+        for board in possible_boards:
+            piece_distribution = merge_piece_distribution_with_new_map(
+                piece_distribution, board.piece_map(), not self.my_color
+            )
+
+        sense_choice_from_dist: Optional[Square] = (
+            get_best_sense_from_piece_distribution(
+                piece_distribution, len(possible_boards)
+            )
+        )
+        if sense_choice_from_dist is not None:
+            return sense_choice_from_dist
+
+        # sense at the move that we would have made with our current knowledge
         future_move = self.choose_move(move_actions, seconds_left)
         if future_move is not None:
             return future_move.to_square
