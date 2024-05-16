@@ -1,0 +1,113 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "RC Bot Match",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_bot_match",
+      "args": [
+        "--seconds_per_player",
+        "${input:seconds_per_player}",
+        "${input:white_bot_path}",
+        "${input:black_bot_path}"
+      ]
+    },
+    {
+      "name": "RC Play",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_play",
+      "args": [
+        "--color",
+        "${input:play_color}",
+        "--seconds_per_player",
+        "${input:seconds_per_player}",
+        "${input:bot_path}"
+      ]
+    },
+    {
+      "name": "RC Playback",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_playback",
+      "args": [
+        "${input:game_history_path}",
+        "${input:bot_path}",
+        "${input:playback_color}"
+      ]
+    },
+    {
+      "name": "RC Replay",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "reconchess.scripts.rc_replay",
+      "args": "${input:game_history_path}"
+    },
+    {
+      "name": "Remote Debug",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "localhost", "port": 8765 },
+      "pathMappings": [{ "localRoot": "${workspaceFolder}", "remoteRoot": "." }]
+    },
+    {
+      "name": "Main",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "main.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Test",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "test.py",
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "game_history_path",
+      "type": "promptString",
+      "description": "Path to game history JSON file.",
+      "default": "history/error/history.json"
+    },
+    {
+      "id": "play_color",
+      "type": "promptString",
+      "description": "The color you want to play as.",
+      "default": "white,black,random"
+    },
+    {
+      "id": "playback_color",
+      "type": "promptString",
+      "description": "The color of the player to playback.",
+      "default": "white,black"
+    },
+    {
+      "id": "bot_path",
+      "type": "promptString",
+      "description": "The path to bot source file or module.",
+      "default": "baseline_agent.py,reconchess.bots.trout_bot"
+    },
+    {
+      "id": "white_bot_path",
+      "type": "promptString",
+      "description": "Path to white bot source file.",
+      "default": "baseline_agent.py,reconchess.bots.trout_bot"
+    },
+    {
+      "id": "black_bot_path",
+      "type": "promptString",
+      "description": "Path to black bot source file.",
+      "default": "baseline_agent.py,reconchess.bots.trout_bot"
+    },
+    {
+      "id": "seconds_per_player",
+      "type": "promptString",
+      "description": "Number of seconds each player has to play the entire game.",
+      "default": "900,900000"
+    }
+  ]
+}

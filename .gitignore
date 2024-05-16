@@ -1,4 +1,14 @@
-time_trial
 __pycache__
-.vscode
+.conda
+.idea
+.run
+.vscode/*
+history
+states
+time_trial
+
 *.json
+*.txt
+
+!/.vscode/launch.json
+!/requirements.txt

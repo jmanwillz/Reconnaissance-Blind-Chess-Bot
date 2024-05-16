@@ -1,17 +1,106 @@
 # Jason Wille (1352200), Kaylyn Karuppen (2465081), Reece Lazarus (2345362)
 
 from chess import *
+from datetime import datetime
+from fentoboardimage import *
 from math import *
 from reconchess import *
 
 import chess.engine
 import os
 
-####################################################################################################################################################################################
+########################################################################################################################
 
 STOCKFISH_ENV_VAR = "STOCKFISH_EXECUTABLE"
 
-####################################################################################################################################################################################
+########################################################################################################################
+
+
+def visualize_boards(boards: List[Board]):
+    os.makedirs("states", exist_ok=True)
+    for index, board in enumerate(boards):
+        boardImage = fenToImage(
+            fen=board.fen(),
+            squarelength=100,
+            pieceSet=loadPiecesFolder("./pieces"),
+            darkColor="#D18B47",
+            lightColor="#FFCE9E",
+        )
+        boardImage.save(
+            os.path.join(
+                "states", f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{index}.png"
+            )
+        )
+
+
+def get_square_not_on_edge(square_on_edge: Square) -> Square:
+    rank = square_rank(square_on_edge)
+    file = square_file(square_on_edge)
+
+    if rank == 0:
+        rank += 1
+    elif rank == 7:
+        rank -= 1
+
+    if file == 0:
+        file += 1
+    elif file == 7:
+        file -= 1
+
+    return square(file, rank)
+
+
+def get_best_sense_from_piece_distribution(
+    piece_distribution, number_of_states: int
+) -> Optional[Square]:
+    for square in piece_distribution.keys():
+        array_length = len(piece_distribution[square])
+        set_of_pieces = set(piece_distribution[square])
+        set_length = len(set_of_pieces)
+        piece_distribution[square] = {
+            "array": piece_distribution[square],
+            "array_length": array_length,
+            "set": set_of_pieces,
+            "set_length": set_length,
+        }
+
+    ordered_squares = [
+        k
+        for k, _ in sorted(
+            piece_distribution.items(),
+            key=lambda item: item[1]["set_length"],
+            reverse=True,
+        )
+    ]
+
+    for square in ordered_squares:
+        if (piece_distribution[square]["array_length"] == number_of_states) and (
+            piece_distribution[square]["set_length"] == 1
+        ):
+            continue
+
+        if piece_distribution[square]["set_length"] > 1:
+            if is_on_edge(square):
+                return get_square_not_on_edge(square)
+            return square
+
+    return None
+
+
+def merge_piece_distribution_with_new_map(
+    piece_distribution: dict, new_map: dict, color: Color
+) -> dict:
+    result = dict()
+    for key in piece_distribution.keys():
+        result[key] = piece_distribution[key]
+    for key in new_map.keys():
+        if key in result.keys():
+            if new_map[key].color == color:
+                result[key].append(new_map[key])
+        else:
+            if new_map[key].color == color:
+                result[key] = [new_map[key]]
+    return result
 
 
 def get_board(fen_string: str) -> Board:
@@ -81,7 +170,7 @@ def get_next_states_with_sensing(boards: List[Board], window: str) -> List[Board
     return result
 
 
-def get_next_states_with_captures(board: Board, square: Square) -> List[Board]:
+def get_next_states_with_capture(board: Board, square: Square) -> List[Board]:
     result = []
     moves = get_possible_moves(board)
     for move in moves:
@@ -105,6 +194,30 @@ def get_boards_as_strings(boards: List[Board]) -> List[str]:
     return sorted(result)
 
 
+def get_strings_as_boards(board_strings: List[str]) -> List[Board]:
+    result = []
+    for board_string in board_strings:
+        result.append(get_board(board_string))
+    return result
+
+
+def is_on_edge(square: Square) -> bool:
+    file, rank = square_file(square), square_rank(square)
+    return file in {0, 7} or rank in {0, 7}
+
+
+def get_window_string(sense_result: List[Tuple[Square, Optional[chess.Piece]]]) -> str:
+    window_str = ""
+    for part in sense_result:
+        window_str += square_name(part[0]) + ":"
+        if part[1] is None:
+            window_str += "?"
+        else:
+            window_str += part[1].symbol()
+        window_str += ";"
+    return window_str[:-1]
+
+
 def initialise_stockfish(local):
     stockfish_path = "/opt/stockfish/stockfish"
 
@@ -122,8 +235,13 @@ def initialise_stockfish(local):
     return chess.engine.SimpleEngine.popen_uci(stockfish_path, setpgrp=True)
 
 
-def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
+def generate_move(board: Board, stockfish_engine, stockfish_time=0.1) -> Optional[Move]:
+    friendly_king_square = board.king(board.turn)
     enemy_king_square = board.king(not board.turn)
+
+    if enemy_king_square == None or friendly_king_square == None:
+        return None
+
     if enemy_king_square:
         enemy_king_attackers = board.attackers(board.turn, enemy_king_square)
         if enemy_king_attackers:
@@ -132,21 +250,24 @@ def generate_move(board: Board, stockfish_engine) -> Optional[Move]:
 
     try:
         board.clear_stack()
-        result = stockfish_engine.play(board, chess.engine.Limit(time=0.1))
+        result = stockfish_engine.play(board, chess.engine.Limit(time=stockfish_time))
         return result.move
     except chess.engine.EngineTerminatedError:
-        print("Stockfish Engine died")
+        print("Agent: Stockfish Engine Died")
     except chess.engine.EngineError:
-        print('Stockfish Engine bad state at "{}"'.format(board.fen()))
+        print(f"Agent: Stockfish Engine bad state at {board.fen()}")
 
     return None
 
 
-def multiple_move_generation(boards: List[Board], stockfish_engine) -> Optional[Move]:
+def multiple_move_generation(
+    boards: List[Board], stockfish_engine, stockfish_time=0.1
+) -> Optional[Move]:
     move_dict = dict()
     for board in boards:
-        new_move = generate_move(board, stockfish_engine).uci()
+        new_move = generate_move(board, stockfish_engine, stockfish_time)
         if new_move != None:
+            new_move = new_move.uci()
             if new_move in move_dict:
                 move_dict[new_move] = move_dict[new_move] + 1
             else:
@@ -160,7 +281,7 @@ def multiple_move_generation(boards: List[Board], stockfish_engine) -> Optional[
     return Move.from_uci(max_move)
 
 
-####################################################################################################################################################################################
+########################################################################################################################
 
 
 def part_1_submission_1():
@@ -199,7 +320,7 @@ def part_2_submission_3():
     capture_block = input()
     board = get_board(fen_string)
     square = parse_square(capture_block)
-    states = get_boards_as_strings(get_next_states_with_captures(board, square))
+    states = get_boards_as_strings(get_next_states_with_capture(board, square))
     for state in states:
         print(state)
 
@@ -233,7 +354,7 @@ def part_3_submission_2(local):
     stockfish_engine.quit()
 
 
-####################################################################################################################################################################################
+########################################################################################################################
 
 
 def main():

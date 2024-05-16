@@ -10,13 +10,12 @@ from main import (
     get_possible_moves_as_strings,
     get_next_states,
     get_boards_as_strings,
-    get_next_states_with_captures,
+    get_next_states_with_capture,
     get_next_states_with_sensing,
     generate_move,
     initialise_stockfish,
+    multiple_move_generation,
 )
-
-import subprocess
 
 ####################################################################################################################################################################################
 
@@ -200,10 +199,10 @@ def part_2_next_state_prediction_with_captures():
     board_2 = get_board(fen_string_2)
 
     states_1 = get_boards_as_strings(
-        get_next_states_with_captures(board_1, parse_square(capture_block_1))
+        get_next_states_with_capture(board_1, parse_square(capture_block_1))
     )
     states_2 = get_boards_as_strings(
-        get_next_states_with_captures(board_2, parse_square(capture_block_2))
+        get_next_states_with_capture(board_2, parse_square(capture_block_2))
     )
 
     states_1_result = solution_1.split("\n")
@@ -301,15 +300,21 @@ def part_3_multiple_move_generation():
     sample_input_1 = "2\nr1bqk2r/pppp1ppp/2n2n2/4B3/1b2P3/1P3N2/P1PP1PPP/RN1QKB1R b KQkq - 0 5\nr1bqk2r/pppp1ppp/2n2n2/4N3/1b2P3/1P6/PBPP1PPP/RN1QKB1R b KQkq - 0 5"
     sample_input_2 = "4\n8/3k2pn/7P/8/8/8/4K3/8 w - - 0 45\n8/3k2pp/7P/8/8/8/4K3/8 w - - 0 45\n8/4k1p1/7P/8/8/8/4K3/8 w - - 0 45\n8/4k1p1/7P/7b/8/8/4K3/8 w - - 0 45"
 
-    command_1 = f'python main.py <<< "{sample_input_1}"'
-    command_2 = f'python main.py <<< "{sample_input_2}"'
+    boards_1 = []
+    boards_2 = []
 
-    result_1 = subprocess.run(
-        command_1, shell=True, capture_output=True, text=True
-    ).stdout.strip()
-    result_2 = subprocess.run(
-        command_2, shell=True, capture_output=True, text=True
-    ).stdout.strip()
+    for index, part in enumerate(sample_input_1.split("\n")):
+        if index != 0:
+            boards_1.append(get_board(part))
+
+    for index, part in enumerate(sample_input_2.split("\n")):
+        if index != 0:
+            boards_2.append(get_board(part))
+
+    stockfish_engine = initialise_stockfish(True)
+
+    result_1 = multiple_move_generation(boards_1, stockfish_engine).uci()
+    result_2 = multiple_move_generation(boards_2, stockfish_engine).uci()
 
     if result_1 == "c6e5":
         print(f"\t- {bcolors.OKGREEN}Passed{bcolors.ENDC} Sample Input 1")
@@ -322,6 +327,8 @@ def part_3_multiple_move_generation():
         count += 1
     else:
         print(f"\t- {bcolors.FAIL}Failed{bcolors.ENDC} Sample Input 2")
+
+    stockfish_engine.quit()
 
     print(
         f"\t- Passed {round(count / 2 * 100, 2)}% of tests for Multiple Move Generation"
