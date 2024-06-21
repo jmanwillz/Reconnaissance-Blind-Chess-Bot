@@ -1,10 +1,9 @@
 # Reconnaissance Blind Chess Bot
 
-## Members
+## Contributors
 
-- Jason Wille (1352200)
-- Kaylyn Karuppen (2465081)
-- Reece Lazarus (2345362)
+| ![Jason Wille](images/jason.jpeg "Jason Wille") <br/> Jason Wille | ![Reece Lazarus](images/reece.jpeg "Reece Lazarus") <br/> Reece Lazarus | ![Kaylyn Karuppen](images/kaylyn.jpeg "Kaylyn Karuppen") <br/> Kaylyn Karuppen |
+| :---: | :---: | :---: |
 
 ## Branching Strategy
 

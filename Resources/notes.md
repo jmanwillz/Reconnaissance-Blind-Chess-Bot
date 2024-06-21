@@ -13,3 +13,14 @@
 #### Part 1 - State Representation
 
 - [Forsyth–Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation)
+- [python-chess](https://python-chess.readthedocs.io/en/latest/index.html)
+
+#### Part 3 - Move Selection
+
+- [Stockfish](https://stockfishchess.org/download/)
+- [Creating a bot](https://reconchess.readthedocs.io/en/latest/bot_create.html)
+
+#### Part 4 - Report
+
+- [Playing games](https://reconchess.readthedocs.io/en/latest/bot_play.html)
+- [The Second NeurIPS Tournament of Reconnaissance Blind Chess](https://proceedings.mlr.press/v176/perrotta22a/perrotta22a.pdf)
