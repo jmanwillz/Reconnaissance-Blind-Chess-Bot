@@ -1,16 +1,11 @@
 # Reconnaissance Blind Chess Bot
 
+A custom implementation of a Reconnaissance Blind Chess bot using the library [reconchess](https://github.com/reconnaissanceblindchess/reconchess).
+
 ## Contributors
 
-| ![Jason Wille](images/jason.jpeg "Jason Wille") <br/> Jason Wille | ![Reece Lazarus](images/reece.jpeg "Reece Lazarus") <br/> Reece Lazarus | ![Kaylyn Karuppen](images/kaylyn.jpeg "Kaylyn Karuppen") <br/> Kaylyn Karuppen |
-| :---: | :---: | :---: |
-
-## Branching Strategy
-
-- master
-- development
-  - feature/feature-name
-  - bug/bug-name
+| ![Jason Wille](images/jason.jpeg "Jason Wille") <br/> [Jason Wille](https://www.linkedin.com/in/jasonwille97/) | ![Reece Lazarus](images/reece.jpeg "Reece Lazarus") <br/> [Reece Lazarus](https://www.linkedin.com/in/reecelaz/) | ![Kaylyn Karuppen](images/kaylyn.jpeg "Kaylyn Karuppen") <br/> [Kaylyn Karuppen](https://www.linkedin.com/in/kaylynkaruppen/) |
+| :------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------: |
 
 ## Installation
 
@@ -54,7 +49,7 @@ export STOCKFISH_EXECUTABLE=$(which stockfish)
 
 #### RC Play
 
-Allows you to play against a bot. Useful for testing and debugging.
+Allows you to play against a bot, using the built in script `rc-play`. Useful for testing and debugging.
 
 ```bash
 # Play as white against the trout bot.
@@ -94,7 +89,7 @@ rc-playback [-h] game_history_path bot_path {white,black}
 
 #### RC Replay
 
-Allows you to watch a saved match.
+Allows you to replay a saved match using the built in script `rc-replay`.
 
 ```bash
 rc-replay [-h] history_path
@@ -102,73 +97,15 @@ rc-replay [-h] history_path
 
 #### Round Robin
 
-In order to play a round robin run the following command:
+In order to play a round robin use the following shell script:
 
 ```bash
 ./round_robin.sh
 ```
 
-This shell script looks as follows:
+## Branching Strategy
 
-```bash
-#!/bin/bash
-
-# Define your Python command with arguments
-rc_bot_match_command="rc-bot-match"
-
-# Define different sets of arguments
-argument_sets=(
-    "baseline_agent.py reconchess.bots.trout_bot"
-    "baseline_agent.py reconchess.bots.random_bot"
-    "reconchess.bots.trout_bot baseline_agent.py"
-    "reconchess.bots.random_bot baseline_agent.py"
-    )
-
-# Number of times to run each argument set
-num_runs=5
-
-# Loop through each set of arguments
-for arguments in "${argument_sets[@]}"; do
-    echo "Running with arguments: $arguments"
-
-    # Extract individual arguments and replace spaces with underscores
-    arguments_formatted=$(echo "$arguments" | sed 's/ /_/g')
-
-    # Run the Python command multiple times with the same arguments
-    for ((i=1; i<=$num_runs; i++)); do
-        # Generate a timestamp
-        timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
-
-        output_file="output_${timestamp}_${arguments_formatted}.txt"
-
-        echo "Run $i"
-        $rc_bot_match_command $arguments >> "$output_file"
-    done
-done
-
-```
-
-## Marks
-
-- Part 1
-
-  1. Board representation: 100% (5%)
-  2. Move execution: 100% (5%)
-
-- Part 2
-
-  1. Next move prediction: 100% (5%)
-  2. Next state prediction: 100% (5%)
-  3. Next state prediction with captures: 100% (5%)
-  4. Next state prediction with sensing: 100% (10%)
-
-- Part 3
-
-  1. Move generation: 100% (5%)
-  2. Multiple move generation: 100% (5%)
-
-- Part 4
-
-  1. Baseline implementation: ?
-  2. Report detailing improvements and round-robin tournament: ?
-  3. Competitive portion: ?
+- master
+- development
+  - feature/feature-name
+  - bug/bug-name
